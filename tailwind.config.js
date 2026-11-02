@@ -4,10 +4,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Rounded all the way through, to match the shape characters: Nunito
-        // for reading and controls, Fredoka for the big type where Nook has fun.
-        sans: ['"Nunito Variable"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        display: ['"Fredoka Variable"', '"Nunito Variable"', '-apple-system', 'sans-serif'],
+        // DM Sans for reading and controls; Bricolage Grotesque, extra bold,
+        // for the big type — titles, board names, the wordmark — where Nook has fun.
+        sans: ['"DM Sans Variable"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['"Bricolage Grotesque Variable"', '"DM Sans Variable"', '-apple-system', 'sans-serif'],
       },
       colors: {
         ink: 'rgb(var(--ink) / <alpha-value>)',

@@ -223,11 +223,11 @@
 }
 
 /*
- * Fredoka is round and chunky: it wants weight and a little air between
- * letters, not the light, tightly tracked setting the old grotesk had. Placed
- * last so it wins over the per-element tracking and weight classes.
+ * Big type is Bricolage at extra bold, set tight — that weight is where it
+ * gets its punch. Placed last so it wins over per-element weight classes.
  */
 :is(h1, h2, .font-display) {
-  font-weight: 600;
-  letter-spacing: -0.012em;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-optical-sizing: auto;
 }
