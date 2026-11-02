@@ -126,7 +126,6 @@
   h1,
   h2 {
     font-family: theme('fontFamily.display');
-    font-optical-sizing: auto;
   }
 
   /* Taps land at once — no double-tap-to-zoom wait on controls. */
@@ -221,4 +220,14 @@
   .buddy-blink {
     animation: none;
   }
+}
+
+/*
+ * Fredoka is round and chunky: it wants weight and a little air between
+ * letters, not the light, tightly tracked setting the old grotesk had. Placed
+ * last so it wins over the per-element tracking and weight classes.
+ */
+:is(h1, h2, .font-display) {
+  font-weight: 600;
+  letter-spacing: -0.012em;
 }

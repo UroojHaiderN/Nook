@@ -4,10 +4,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Instrument Sans for reading and controls; Bricolage Grotesque for the
-        // big type — titles, headings, the wordmark — where Nook gets its voice.
-        sans: ['"Instrument Sans Variable"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        display: ['"Bricolage Grotesque Variable"', '"Instrument Sans Variable"', '-apple-system', 'sans-serif'],
+        // Rounded all the way through, to match the shape characters: Nunito
+        // for reading and controls, Fredoka for the big type where Nook has fun.
+        sans: ['"Nunito Variable"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['"Fredoka Variable"', '"Nunito Variable"', '-apple-system', 'sans-serif'],
       },
       colors: {
         ink: 'rgb(var(--ink) / <alpha-value>)',

@@ -33,7 +33,7 @@ export default defineConfig({
       injectRegister: 'auto',
       workbox: {
         // Latin only: the other scripts are fetched on demand if a note needs them.
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}', '**/bricolage-grotesque-latin-*.woff2', '**/instrument-sans-latin-*.woff2'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}', '**/fredoka-latin-*.woff2', '**/nunito-latin-*.woff2'],
         // Only the app is a single page; the website and policy are real pages.
         navigateFallback: '/app/index.html',
         navigateFallbackAllowlist: [/^\/app/],
