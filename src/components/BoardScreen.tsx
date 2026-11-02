@@ -5,7 +5,7 @@ import VoiceCard from './VoiceCard'
 import AddSheet from './AddSheet'
 import PeopleSheet from './PeopleSheet'
 import { Avatar } from './Chrome'
-import { Back, PersonPlus, Plus, Search, Tune } from './Icons'
+import { Back, PersonPlus, Plus, Tune } from './Icons'
 import { ShapeCluster } from './Shapes'
 import { ago, useBoard } from '../store'
 import { useEscape } from '../hooks'
@@ -21,14 +21,6 @@ function useRotatingHint() {
     return () => window.clearInterval(t)
   }, [])
   return HINTS[i]
-}
-
-const matches = (p: Piece, q: string) => {
-  if (!q) return true
-  const t = q.toLowerCase()
-  if (p.kind === 'item') return `${p.title} ${p.category} ${p.amount}`.toLowerCase().includes(t)
-  if (p.kind === 'note') return `${p.label} ${p.body}`.toLowerCase().includes(t)
-  return `voice note ${p.clips.map((c) => c.transcript ?? '').join(' ')}`.toLowerCase().includes(t)
 }
 
 export default function BoardScreen({
@@ -71,7 +63,6 @@ export default function BoardScreen({
 
   const visible = useMemo(() => {
     const list = pieces.filter((p) => {
-      if (!matches(p, query)) return false
       if (p.kind === 'item' && hideDone && p.done) return false
       return true
     })
@@ -92,7 +83,7 @@ export default function BoardScreen({
       },
     }
     return [...list].sort(by[sort])
-  }, [pieces, query, sort, hideDone])
+  }, [pieces, sort, hideDone])
 
   /** Aisle order is the only view with headings; everything else is one run. */
   const sections = useMemo(() => {
@@ -121,42 +112,52 @@ export default function BoardScreen({
     inputRef.current?.blur()
   }
 
-  /** What "nothing here" means depends on why it is empty. */
-  const empty = query
-    ? {
-        title: `No “${query}” here yet`,
-        body: 'Press return and it goes on the list.',
-        action: { label: 'Clear search', run: () => setQuery('') },
-      }
-    : adjusted
-      ? {
-          title: 'All hidden away',
-          body: 'Everything here is tucked behind the view you set.',
-          action: {
-            label: 'Show everything',
-            run: () => {
-              setHideDone(false)
-              setSort('board')
-            },
-          },
-        }
-      : {
-          title: 'A clean slate',
-          body: 'Type what you need — “6 eggs”, “oat milk 1l” — and it lands with a picture. Or + for a note or a voice memo.',
-          action: { label: 'Add the first thing', run: () => setAdding(true) },
-        }
+  /** Tap one and it's on the list — the quickest way to see how adding works. */
+  const STARTERS = ['6 eggs', 'oat milk 1l', 'sourdough', 'bananas', 'coffee 250g']
+
+  /** Share and view, said in words — two bare icons left people guessing. */
+  const actions = (
+    <div className="flex shrink-0 items-center gap-2">
+      <button
+        onClick={() => setPeopleOpen(true)}
+        aria-label={invited.length ? `Share — ${invited.length + 1} people on this board` : 'Share this board'}
+        className="tap flex h-10 items-center gap-2 rounded-full border border-hairline/15 pl-2.5 pr-4 text-[15px] text-ink hover:border-hairline/35"
+      >
+        {invited.length ? (
+          <span className="flex -space-x-1.5">
+            {invited.slice(0, 3).map((m) => (
+              <Avatar key={m.id} person={m} size={22} ring />
+            ))}
+          </span>
+        ) : (
+          <PersonPlus className="h-[19px] w-[19px]" />
+        )}
+        Share
+      </button>
+      <button
+        onClick={() => setViewOpen((v) => !v)}
+        aria-label={adjusted ? 'View options (some hidden)' : 'View options'}
+        aria-expanded={viewOpen}
+        className={`tap flex h-10 items-center gap-2 rounded-full border px-3 text-[15px] transition-colors sm:pl-3 sm:pr-4 ${
+          viewOpen || adjusted ? 'border-ink bg-ink text-on-ink' : 'border-hairline/15 text-ink hover:border-hairline/35'
+        }`}
+      >
+        <Tune className="h-[19px] w-[19px]" />
+        <span className="hidden sm:inline">View</span>
+      </button>
+    </div>
+  )
 
   /** The add field, drawn for a light or a dark surface. */
   const addBar = (dark: boolean) => (
     <>
-      <Search className={`h-[17px] w-[17px] shrink-0 ${dark ? 'text-on-ink/50' : 'text-muted'}`} />
       <input
         ref={inputRef}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && submit()}
-        placeholder={`I need… ${hint}`}
-        aria-label="Search this board, or type something and press return to add it"
+        placeholder={`Add an item — try “${hint}”`}
+        aria-label="Add an item: type it and press Enter"
         className={`w-full min-w-0 bg-transparent text-[16px] outline-none ${
           dark ? 'text-on-ink placeholder:text-on-ink/45' : 'text-ink placeholder:text-muted'
         }`}
@@ -167,7 +168,7 @@ export default function BoardScreen({
             setQuery('')
             inputRef.current?.focus()
           }}
-          aria-label="Clear search"
+          aria-label="Clear"
           className={`tap hit z-10 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[15px] leading-none ${
             dark ? 'bg-on-ink/15 text-on-ink' : 'bg-hairline/15 text-ink'
           }`}
@@ -177,7 +178,7 @@ export default function BoardScreen({
       )}
       <button
         onClick={() => (query.trim() ? submit() : setAdding(true))}
-        aria-label={query.trim() ? `Add ${query.trim()}` : 'Add to this board'}
+        aria-label={query.trim() ? `Add ${query.trim()}` : 'Add a note, voice memo or item'}
         className={`tap hit z-10 grid h-[42px] w-[42px] shrink-0 place-items-center rounded-full ${
           dark ? 'bg-lime text-ink' : 'bg-ink text-on-ink'
         }`}
@@ -223,38 +224,7 @@ export default function BoardScreen({
             </>
           )}
 
-          <div className="flex shrink-0 items-center gap-1">
-            <button
-              onClick={() => setPeopleOpen(true)}
-              aria-label={
-                invited.length
-                  ? `People on this board: ${invited.length + 1}`
-                  : 'Invite people to this board'
-              }
-              className="tap grid h-11 min-w-11 place-items-center rounded-full px-1 text-ink"
-            >
-              {invited.length ? (
-                <span className="flex -space-x-1.5">
-                  {invited.slice(0, 3).map((m) => (
-                    <Avatar key={m.id} person={m} size={22} ring />
-                  ))}
-                </span>
-              ) : (
-                <PersonPlus className="h-[21px] w-[21px]" />
-              )}
-            </button>
-
-            <button
-              onClick={() => setViewOpen((v) => !v)}
-              aria-label={adjusted ? 'View options (filter on)' : 'View options'}
-              aria-expanded={viewOpen}
-              className={`tap -mr-2 grid h-11 w-11 place-items-center rounded-full transition-colors ${
-                viewOpen || adjusted ? 'bg-ink text-on-ink' : 'text-ink'
-              }`}
-            >
-              <Tune className="h-[21px] w-[21px]" />
-            </button>
-          </div>
+          {!embedded && actions}
         </div>
 
         <div
@@ -262,23 +232,36 @@ export default function BoardScreen({
             folded ? 'max-h-0 opacity-0' : 'max-h-40 opacity-100'
           }`}
         >
-          <h1 className="mt-2 text-[36px] font-normal leading-[1.02] tracking-[-0.04em] text-ink sm:text-[48px]">
-            {board.title}
-          </h1>
-          <p className="mt-1 text-[13px] text-muted">
-            {pieces.length === 0 ? 'Nothing on it yet' : `Updated ${ago(board.updatedAt)}`}
-          </p>
+          <div className="flex items-end justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="mt-2 text-[36px] font-normal leading-[1.02] tracking-[-0.04em] text-ink sm:text-[48px]">
+                {board.title}
+              </h1>
+              <p className="mt-1 text-[13px] text-muted">
+                {pieces.length === 0 ? 'Nothing on it yet' : `Updated ${ago(board.updatedAt)}`}
+              </p>
+            </div>
+            {embedded && <div className="pb-1">{actions}</div>}
+          </div>
         </div>
 
         {embedded && (
-          <div className="mt-6 flex h-[52px] max-w-xl items-center gap-1.5 rounded-full bg-panel p-2 pl-4">
-            {addBar(false)}
+          <div className="mt-6 flex items-center gap-3">
+            <div className="flex h-[52px] min-w-0 flex-1 items-center gap-1.5 rounded-full bg-panel p-2 pl-5">
+              {addBar(false)}
+            </div>
+            <button
+              onClick={() => setAdding(true)}
+              className="tap h-[52px] shrink-0 rounded-full border border-hairline/15 px-5 text-[15px] text-ink hover:border-hairline/35"
+            >
+              Note or voice memo
+            </button>
           </div>
         )}
 
         {/* One popover for how the board is shown — order and filter together. */}
         {viewOpen && (
-          <div className="absolute right-0 top-[48px] z-30 w-[236px] animate-pop-in origin-top-right rounded-[20px] bg-surface p-3 shadow-lift">
+          <div className={`absolute right-0 z-30 w-[236px] ${embedded ? 'top-[84px]' : 'top-[48px]'} animate-pop-in origin-top-right rounded-[20px] bg-surface p-3 shadow-lift`}>
             <p className="pb-2 text-[11px] font-medium uppercase tracking-wider text-muted">
               Order
             </p>
@@ -335,17 +318,46 @@ export default function BoardScreen({
       {/* Grid */}
       <main onScroll={onScroll} className="no-scrollbar flex-1 overflow-y-auto px-4 pb-[120px] pt-1 sm:px-8">
         <div className="mx-auto w-full max-w-5xl">
-        {visible.length === 0 ? (
-          <div className="mt-20 flex flex-col items-center px-10 text-center">
-            <ShapeCluster />
-            <p className="font-display mt-6 text-[24px] font-normal tracking-[-0.03em] text-ink">{empty.title}</p>
-            <p className="mt-1 text-[13px] leading-snug text-muted">{empty.body}</p>
+        {visible.length === 0 && adjusted ? (
+          <div className="mt-10 max-w-md px-1">
+            <p className="font-display text-[24px] tracking-[-0.02em] text-ink">All hidden away</p>
+            <p className="mt-1 text-[14px] leading-snug text-muted">Everything here is tucked behind the view you chose.</p>
             <button
-              onClick={empty.action.run}
-              className="tap mt-5 rounded-full bg-ink px-6 py-3 text-[14px] text-on-ink"
+              onClick={() => {
+                setHideDone(false)
+                setSort('board')
+              }}
+              className="tap mt-4 rounded-full bg-ink px-5 py-2.5 text-[14px] text-on-ink"
             >
-              {empty.action.label}
+              Show everything
             </button>
+          </div>
+        ) : visible.length === 0 ? (
+          <div className="mt-8 max-w-lg px-1 sm:mt-10">
+            <div className="origin-left scale-75">
+              <ShapeCluster />
+            </div>
+            <p className="font-display mt-2 text-[26px] tracking-[-0.02em] text-ink">Start your list</p>
+            <p className="mt-1 text-[15px] leading-snug text-muted">
+              Type what you need {embedded ? 'in the bar above' : 'in the bar below'} and press Enter — “6 eggs”,
+              “oat milk 1l”. Or tap one to try it:
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {STARTERS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => addItem(s)}
+                  className="tap rounded-full border border-hairline/15 px-3.5 py-2 text-[14px] text-ink hover:border-hairline/40"
+                >
+                  + {s}
+                </button>
+              ))}
+            </div>
+            {!embedded && (
+              <button onClick={() => setAdding(true)} className="mt-5 text-[14px] text-ink underline underline-offset-2">
+                Add a note or voice memo instead
+              </button>
+            )}
           </div>
         ) : (
           /* One grid per section. Dense packing then tidies the holes inside a

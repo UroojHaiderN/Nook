@@ -109,7 +109,7 @@ export default function App() {
               onBack={() => go({ boardId: null, noteId: null })}
             />
           ) : (
-            <BoardsScreen onOpen={(id) => go({ boardId: id, noteId: null })} />
+            <BoardsScreen embedded={wide} onOpen={(id) => go({ boardId: id, noteId: null })} />
           )}
         </div>
 

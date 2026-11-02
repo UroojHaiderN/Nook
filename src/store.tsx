@@ -74,28 +74,12 @@ export const pendingJoin = (): PendingJoin | null => {
   }
 }
 
-const starterBoard = (): Board => {
-  const now = Date.now()
-  return {
-    id: `board-${uid()}`,
-    title: 'Weekly shop',
-    color: 0,
-    inviteToken: newInviteToken(),
-    createdAt: now,
-    updatedAt: now,
-    pieces: [],
-    members: [YOU],
-  }
-}
 
+/** Everyone starts with no boards; the first one is theirs to name. */
 const fresh = (): Saved => {
   if (new URLSearchParams(location.search).has('demo'))
     return { boards: seedBoards, activeId: seedBoards[0].id }
-  // With accounts, the first board comes from the first sign-in instead:
-  // a starter made here would be handed to whoever signs in on this device.
-  if (backendConfigured) return { boards: [], activeId: null }
-  const board = starterBoard()
-  return { boards: [board], activeId: board.id }
+  return { boards: [], activeId: null }
 }
 
 /**
@@ -137,7 +121,6 @@ const load = (): Saved => {
     const raw = localStorage.getItem(KEY)
     if (!raw) return fresh()
     const parsed = JSON.parse(raw) as Saved
-    if (!parsed?.boards?.length && !backendConfigured) return fresh()
     if (!parsed?.boards) return fresh()
     return migrate(parsed)
   } catch {
@@ -149,7 +132,7 @@ export type Toast = { id: number; msg: string; action?: { label: string; run: ()
 
 type Ctx = {
   boards: Board[]
-  /** True when this browser had no saved boards — used to open the starter board. */
+  /** True when this browser had no saved boards before this visit. */
   firstRun: boolean
   /** Signed in, and the account's boards haven't arrived yet. */
   loading: boolean
@@ -384,22 +367,11 @@ export function BoardProvider({ children }: { children: ReactNode }) {
         next.push(r)
       }
 
-      // A brand-new account starts with one board to put things on — unless it
-      // arrived by invite, in which case the shared board is the start.
-      let starter: string | null = null
-      if (initial && !next.length && !joined) {
-        const b = { ...starterBoard(), owner: userId }
-        starter = b.id
-        next.push(b)
-      }
-
       const merged = assignColors(next)
       setState((s) => ({
         boards: merged,
-        activeId:
-          joined ?? starter ?? (merged.some((b) => b.id === s.activeId) ? s.activeId : null),
+        activeId: joined ?? (merged.some((b) => b.id === s.activeId) ? s.activeId : null),
       }))
-      if (starter) location.hash = `#/b/${starter}`
       setLoadedFor(userId)
       if (joined) {
         location.hash = `#/b/${joined}`

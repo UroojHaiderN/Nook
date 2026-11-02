@@ -102,7 +102,14 @@ function BoardRow({ board, onOpen }: { board: Board; onOpen: () => void }) {
   )
 }
 
-export default function BoardsScreen({ onOpen }: { onOpen: (id: string) => void }) {
+export default function BoardsScreen({
+  onOpen,
+  embedded = false,
+}: {
+  onOpen: (id: string) => void
+  /** Beside the sidebar, which already has the account button and New board. */
+  embedded?: boolean
+}) {
   const { boards, createBoard, loading } = useBoard()
   const { email } = useAccount()
   const [query, setQuery] = useState('')
@@ -137,6 +144,7 @@ export default function BoardsScreen({ onOpen }: { onOpen: (id: string) => void 
               Your boards
             </h1>
           </div>
+          {!embedded && (
           <button
             onClick={() => setAccount(true)}
             aria-label={email ? `Account: ${email}` : 'Where your boards are kept'}
@@ -148,6 +156,7 @@ export default function BoardsScreen({ onOpen }: { onOpen: (id: string) => void 
               <PersonPlus className="h-[21px] w-[21px]" />
             )}
           </button>
+          )}
         </div>
 
         {boards.length >= SEARCH_AT && (
@@ -170,15 +179,41 @@ export default function BoardsScreen({ onOpen }: { onOpen: (id: string) => void 
             <ShapeCluster />
             <p className="mt-6 text-[15px] text-muted">Getting your boards…</p>
           </div>
+        ) : visible.length === 0 && query ? (
+          <div className="mt-10 px-1">
+            <p className="font-display text-[24px] tracking-[-0.02em] text-ink">No board by that name</p>
+            <p className="mt-1 text-[14px] text-muted">Try a different word, or start a new one.</p>
+          </div>
         ) : visible.length === 0 ? (
-          <div className="mt-20 flex flex-col items-center px-10 text-center">
-            <ShapeCluster />
-            <p className="font-display mt-6 text-[24px] font-normal tracking-[-0.03em] text-ink">
-              {query ? 'No board by that name' : 'No boards yet'}
+          /* First visit: nothing made for you, one tap to make your own. */
+          <div className="mt-6 max-w-lg px-1">
+            <div className="origin-left scale-75">
+              <ShapeCluster />
+            </div>
+            <p className="font-display mt-2 text-[28px] leading-tight tracking-[-0.02em] text-ink">
+              Make your first board
             </p>
-            <p className="mt-1 text-[13px] leading-snug text-muted">
-              {query ? 'Try a different word, or start a new one.' : 'Start one below.'}
+            <p className="mt-1.5 text-[15px] leading-snug text-muted">
+              One board for each shop, trip or plan — the list, notes and voice memos for it in one
+              place, shared with whoever’s in on it. Pick a name to start:
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {['Weekly shop', 'House stuff', 'Birthday party', 'Weekend trip'].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => onOpen(createBoard(n))}
+                  className="tap rounded-full border border-hairline/15 px-4 py-2.5 text-[15px] text-ink hover:border-hairline/40"
+                >
+                  {n}
+                </button>
+              ))}
+              <button
+                onClick={() => setCreating(true)}
+                className="tap rounded-full bg-ink px-4 py-2.5 text-[15px] text-on-ink"
+              >
+                Name my own…
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -197,6 +232,8 @@ export default function BoardsScreen({ onOpen }: { onOpen: (id: string) => void 
 
       {account && <AccountMenu onClose={() => setAccount(false)} />}
 
+      {(!embedded || creating) && (
+      <>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[120px] bg-gradient-to-t from-canvas via-canvas to-transparent" />
       <div className="absolute inset-x-4 bottom-[calc(var(--safe-bottom)+16px)] z-20 mx-auto max-w-xl sm:inset-x-8">
         {creating ? (
@@ -227,6 +264,8 @@ export default function BoardsScreen({ onOpen }: { onOpen: (id: string) => void 
           </button>
         )}
       </div>
+      </>
+      )}
     </div>
   )
 }
