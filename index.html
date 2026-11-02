@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      /*
+       * The app used to live at /, so links already out in the world point here:
+       * board invites (#/join/…), boards (#/b/…), and the sign-in links in
+       * emails (#access_token=…, ?code=…). Send all of those on to the app
+       * before anything else loads. So does opening Nook from a home screen.
+       */
+      ;(function () {
+        var h = location.hash, s = location.search
+        var appLink = /^#\//.test(h) || /access_token|refresh_token|error_description|type=recovery/.test(h) || /[?&](code|token_hash)=/.test(s)
+        var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone
+        var path = location.pathname.replace(/\/$/, '')
+        if (path === '/signup' || path === '/login') return location.replace('/app/#' + path)
+        if (appLink || standalone) location.replace('/app/' + s + h)
+      })()
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Nook — the shopping list the whole house can see</title>
+    <meta
+      name="description"
+      content="Shopping lists, sticky notes and voice memos on one board you share with a link. Free, works in any browser, nothing to install."
+    />
+    <meta name="theme-color" content="#FFFFFF" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon-180.png" />
+    <link rel="canonical" href="https://nook-navy-mu.vercel.app/" />
+    <meta property="og:title" content="Nook — the shopping list the whole house can see" />
+    <meta property="og:description" content="Lists, notes and voice memos on one board you share with a link. Free." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://nook-navy-mu.vercel.app/" />
+    <meta property="og:image" content="https://nook-navy-mu.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Nook needs JavaScript to run.</noscript>
+    <script type="module" src="/src/landing/main.tsx"></script>
+  </body>
+</html>

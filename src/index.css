@@ -1,0 +1,224 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /*
+   * One palette, two appearances. Everything downstream uses these tokens, so
+   * light and dark stay in step instead of drifting apart component by component.
+   */
+  /*
+   * A block palette: near-black ground, four saturated panels, black type on
+   * every panel. The design is dark by nature, so both appearances render the
+   * same thing rather than inventing a washed-out light twin.
+   */
+  /*
+   * Bright panels on a pale ground, black type on everything. The panels carry
+   * the colour; the ground stays quiet so a long list never shouts.
+   */
+  /*
+   * Content leads, chrome recedes. White cards on a quiet grey, one near-black
+   * for anything you press, and colour only ever as a tint — a dot, a pill, a
+   * sheet of note paper. Depth comes from soft shadow, not from borders.
+   */
+  /*
+   * White ground, black type, and four colours used in blocks: lime, lilac,
+   * cobalt, tomato. The colours are loud on their own; what keeps it calm is
+   * the white around them and type that is large but light, never bold.
+   */
+  :root {
+  /* How far the phone's own furniture — notch, status bar, home indicator —
+     reaches into the page. The phone mockup (?frame) sets its own. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+    --page: 255 255 255;
+    --canvas: 255 255 255;
+    --surface: 255 255 255;
+    --panel: 242 242 245;
+    --ink: 17 17 17;
+    --on-ink: 255 255 255;
+    --muted: 107 107 112;
+    --hairline: 17 17 17;
+    --wave: 214 214 220;
+    --scrim: 17 17 17;
+    --danger: 232 76 40;
+    --accent: 17 17 17;
+    --on-accent: 255 255 255;
+    --on-block: 17 17 17;
+
+    --lime: 226 241 107;
+    --lilac: 219 184 242;
+    --cobalt: 68 80 214;
+    --tomato: 240 88 47;
+
+    color-scheme: light;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-optical-sizing: auto;
+    background: rgb(var(--page));
+    color: rgb(var(--ink));
+    -webkit-font-smoothing: antialiased;
+    /* An app, not a page: no rubber-band past the edges, no grey tap flash. */
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input,
+  textarea {
+    font: inherit;
+  }
+}
+
+@layer components {
+  /* Every tappable surface answers the finger: a small, quick, quiet press. */
+  .tap {
+    transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .tap:active {
+    transform: scale(0.965);
+  }
+
+  /*
+   * Small controls, full-size targets. Apple asks for 44pt; these buttons are
+   * drawn at 26–36px because that is what the design wants, so the touchable
+   * area is extended past the paint instead.
+   */
+  .hit {
+    position: relative;
+  }
+  .hit::after {
+    content: '';
+    position: absolute;
+    inset: -9px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  /* Full-bleed on a real device: the OS already draws the status bar. */
+  .safe-top {
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@layer base {
+  h1,
+  h2 {
+    font-family: theme('fontFamily.display');
+    font-optical-sizing: auto;
+  }
+
+  /* Taps land at once — no double-tap-to-zoom wait on controls. */
+  button,
+  [role='button'],
+  a,
+  input,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  /*
+   * A website is driven by a keyboard as often as a finger. The browser default
+   * ring disappears against our surfaces, so make it explicit — and only for
+   * keyboard focus, so a mouse click does not leave a ring behind.
+   */
+  :focus-visible {
+    outline: 2px solid rgb(var(--ink));
+    outline-offset: 2px;
+  }
+
+  .paper {
+    transform: rotate(var(--tilt, 0deg));
+    transition:
+      transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 180ms ease-out;
+  }
+  .paper:active {
+    transform: rotate(0deg) scale(0.965);
+  }
+
+  /* Pointer devices get feedback before the click, not only during it. */
+  @media (hover: hover) and (pointer: fine) {
+    .tap {
+      transition:
+        transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 180ms ease-out;
+    }
+    .liftable:hover {
+      box-shadow:
+        0 2px 8px rgba(28, 28, 30, 0.06),
+        0 18px 36px -18px rgba(28, 28, 30, 0.22);
+    }
+    .paper:hover {
+      transform: rotate(0deg) translateY(-3px);
+    }
+    /* The thing on the card has a little shuffle when you hover. */
+    .liftable:hover .art {
+      animation: wiggle 420ms ease-in-out;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* The shape characters (website and sign-in). */
+.buddy-bob {
+  animation: buddy-bob 3.2s ease-in-out infinite;
+}
+@keyframes buddy-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+.buddy-blink {
+  animation: buddy-blink 5.5s infinite;
+}
+@keyframes buddy-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .buddy-bob,
+  .buddy-blink {
+    animation: none;
+  }
+}
