@@ -55,7 +55,8 @@ const page = (c) => `<!doctype html><html><head><meta charset="utf-8"><style>
   fs.rmSync(OUT, { recursive: true, force: true })
   fs.mkdirSync(OUT)
   const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--allow-file-access-from-files'] })
-  const p = await browser.newPage({ viewport: { width: 1920, height: 1080 } })
+  // Laid out at 1920x1080, drawn at 2x: crisp 4K cards.
+  const p = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2 })
   for (const c of CARDS) {
     const file = path.join(OUT, `${c.id}.html`)
     fs.writeFileSync(file, page(c))

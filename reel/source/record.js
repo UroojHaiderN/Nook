@@ -6,26 +6,69 @@ const path = require('path')
 
 const OUT = path.join(__dirname, 'scenes')
 const APP = 'http://localhost:5174'
-const W = 1920
-const H = 1080
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+// Recorded at 4K. The page runs SLOW times slower than real life, so the
+// screencast (which only manages ~12 fps at 4K) still catches 30+ fps of the
+// app's own time; build.py speeds the footage back up by the same factor.
+const W = 3840
+const H = 2160
+const SLOW = 3
+const ZOOM = 2.7 // the app at 1.35x its desktop size, at 2x pixel density
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms * SLOW))
 
-/* A visible cursor, since a headless browser has none. */
+/* Slows the page's own clock: timers, Date, performance.now and rAF. */
+const SLOW_CLOCK = `(() => {
+  const K = ${SLOW}
+  const realNow = performance.now.bind(performance)
+  const realDate = Date.now
+  const t0 = realNow(), d0 = realDate()
+  performance.now = () => t0 + (realNow() - t0) / K
+  Date.now = () => d0 + (realDate() - d0) / K
+  const st = window.setTimeout, si = window.setInterval
+  window.setTimeout = (fn, ms = 0, ...a) => st(fn, ms * K, ...a)
+  window.setInterval = (fn, ms = 0, ...a) => si(fn, ms * K, ...a)
+  const raf = window.requestAnimationFrame.bind(window)
+  window.requestAnimationFrame = (cb) => raf(() => cb(performance.now()))
+})()`
+
+/* A visible cursor, since a headless browser has none. Animated on the page's
+   own (slowed) clock rather than with CSS transitions, so it glides smoothly. */
 const CURSOR = `
 (() => {
   if (document.getElementById('reel-cursor')) return
   const c = document.createElement('div')
   c.id = 'reel-cursor'
-  c.style.cssText = 'position:fixed;left:960px;top:620px;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:rgba(17,17,17,.88);border:3px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:2147483647;pointer-events:none;transition:left .55s cubic-bezier(.3,.7,.2,1),top .55s cubic-bezier(.3,.7,.2,1),transform .12s'
+  c.style.cssText = 'position:fixed;left:0;top:0;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:rgba(17,17,17,.88);border:3px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:2147483647;pointer-events:none;will-change:transform'
   document.body.appendChild(c)
-  window.__moveCursor = (x, y) => { c.style.left = x + 'px'; c.style.top = y + 'px' }
+  // Positions are in on-screen pixels (what getBoundingClientRect reports), but a
+  // fixed element inside a zoomed page has its offsets multiplied by the zoom.
+  const z = parseFloat(document.documentElement.style.zoom) || 1
+  let x = innerWidth / 2, y = innerHeight * 0.6, s = 1
+  const draw = () => { c.style.transform = 'translate(' + x / z + 'px,' + y / z + 'px) scale(' + s + ')' }
+  draw()
+  const ease = (k) => 1 - Math.pow(1 - k, 3)
+  window.__moveCursor = (tx, ty, ms = 550) => {
+    const fx = x, fy = y, t0 = performance.now()
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / ms)
+      x = fx + (tx - fx) * ease(k); y = fy + (ty - fy) * ease(k); draw()
+      if (k < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  }
   window.__press = () => {
-    c.style.transform = 'scale(.78)'
     const r = document.createElement('div')
-    r.style.cssText = 'position:fixed;left:' + c.style.left + ';top:' + c.style.top + ';width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:3px solid rgba(17,17,17,.45);z-index:2147483646;pointer-events:none;transition:transform .45s ease-out,opacity .45s ease-out'
+    r.style.cssText = 'position:fixed;left:0;top:0;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:3px solid rgba(17,17,17,.45);z-index:2147483646;pointer-events:none'
     document.body.appendChild(r)
-    requestAnimationFrame(() => { r.style.transform = 'scale(2.6)'; r.style.opacity = '0' })
-    setTimeout(() => { c.style.transform = ''; r.remove() }, 480)
+    const t0 = performance.now(), px = x, py = y
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / 450)
+      s = k < 0.25 ? 1 - k * 0.9 : 0.78 + (k - 0.25) * 0.29
+      r.style.transform = 'translate(' + px / z + 'px,' + py / z + 'px) scale(' + (1 + k * 1.6) + ')'
+      r.style.opacity = String(1 - k)
+      draw()
+      if (k < 1) requestAnimationFrame(step); else { s = 1; draw(); r.remove() }
+    }
+    requestAnimationFrame(step)
   }
 })()`
 
@@ -49,8 +92,13 @@ async function run() {
     deviceScaleFactor: 1,
     permissions: ['microphone'],
   })
+  await context.addInitScript(SLOW_CLOCK)
   const page = await context.newPage()
   const cdp = await context.newCDPSession(page)
+  // CSS animations and transitions slow down with the clock.
+  await cdp.send('Animation.enable')
+  const slowAnimations = () => cdp.send('Animation.setPlaybackRate', { playbackRate: 1 / SLOW })
+  await slowAnimations()
 
   let scene = null
   let n = 0
@@ -66,7 +114,7 @@ async function run() {
     scene = name
     n = 0
     fs.mkdirSync(path.join(OUT, name), { recursive: true })
-    await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 92, maxWidth: W, maxHeight: H, everyNthFrame: 1 })
+    await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 95, maxWidth: W, maxHeight: H, everyNthFrame: 1 })
     await sleep(400)
   }
   const stop = async (hold = 600) => {
@@ -80,9 +128,12 @@ async function run() {
 
   const cursor = async () => page.evaluate(CURSOR)
   const moveTo = async (locator, settle = 650) => {
-    const box = await locator.boundingBox()
-    if (!box) throw new Error('nothing to point at: ' + locator)
-    await page.evaluate(([x, y]) => window.__moveCursor(x, y), [box.x + box.width / 2, box.y + box.height / 2])
+    await locator.scrollIntoViewIfNeeded()
+    // Measured inside the page, so the cursor and its target share one coordinate system.
+    await locator.evaluate((el) => {
+      const r = el.getBoundingClientRect()
+      window.__moveCursor(r.left + r.width / 2, r.top + r.height / 2)
+    })
     await sleep(settle)
   }
   const click = async (locator, after = 700) => {
@@ -93,7 +144,7 @@ async function run() {
   }
   const typeInto = async (locator, text, after = 550) => {
     await click(locator, 250)
-    await page.keyboard.type(text, { delay: 75 })
+    await page.keyboard.type(text, { delay: 75 * SLOW })
     await sleep(350)
     await page.keyboard.press('Enter')
     await sleep(after)
@@ -106,16 +157,17 @@ async function run() {
     sessionStorage.setItem('nook.splash.seen', '1')
   })
   await page.reload()
+  await slowAnimations()
   await page.waitForSelector('text=Make your first board')
   // Bigger interface for the video: legible on a phone-sized YouTube player.
-  await page.evaluate(() => {
-    document.documentElement.style.zoom = '1.35'
+  await page.evaluate((ZOOM) => {
+    document.documentElement.style.zoom = String(ZOOM)
     // Full-height layout is measured in unzoomed viewport units; scale it back so
     // the app still fits the window and only its own board area scrolls.
     const s = document.createElement('style')
-    s.textContent = '.h-\\[100dvh\\] { height: calc(100dvh / 1.35) !important; }'
+    s.textContent = '.h-\\[100dvh\\] { height: calc(100dvh / ' + ZOOM + ') !important; }'
     document.head.appendChild(s)
-  })
+  }, ZOOM)
   await sleep(1500) // let fonts settle and the splash go
   await cursor()
 
@@ -142,7 +194,7 @@ async function run() {
   await click(page.getByRole('button', { name: /^Note/ }), 1100)
   const text = page.getByLabel('Note text')
   await click(text, 300)
-  await page.keyboard.type('Get the ripe avocados, not the rock-hard ones!', { delay: 55 })
+  await page.keyboard.type('Get the ripe avocados, not the rock-hard ones!', { delay: 55 * SLOW })
   await sleep(500)
   await click(page.getByLabel('Lilac note'), 800)
   await click(page.getByRole('button', { name: 'Done' }), 1200)
@@ -173,8 +225,10 @@ async function run() {
   // 6. Sharing, from the website's demo board (it shows someone joining).
   // Full 1920x1080, with the page itself zoomed 1.6x so the demo fills the frame sharply.
   const zoomed = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1 })
+  await zoomed.addInitScript(SLOW_CLOCK)
   const zp = await zoomed.newPage()
   const zcdp = await zoomed.newCDPSession(zp)
+  await zcdp.send('Animation.enable')
   zcdp.on('Page.screencastFrame', async (f) => {
     zcdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {})
     if (!scene) return
@@ -186,7 +240,7 @@ async function run() {
     scene = name
     n = 0
     fs.mkdirSync(path.join(OUT, name), { recursive: true })
-    await zcdp.send('Page.startScreencast', { format: 'jpeg', quality: 92, maxWidth: W, maxHeight: H, everyNthFrame: 1 })
+    await zcdp.send('Page.startScreencast', { format: 'jpeg', quality: 95, maxWidth: W, maxHeight: H, everyNthFrame: 1 })
   }
   const zstop = async () => {
     await zcdp.send('Page.stopScreencast')
@@ -194,7 +248,8 @@ async function run() {
   }
   await zp.goto(APP + '/')
   await zp.waitForSelector('#how')
-  await zp.evaluate(() => (document.documentElement.style.zoom = '1.6'))
+  await zcdp.send('Animation.setPlaybackRate', { playbackRate: 1 / SLOW })
+  await zp.evaluate(() => (document.documentElement.style.zoom = '3.2'))
   await sleep(800)
   await zstart('06-share')
   await zp.evaluate(() => document.getElementById('how').scrollIntoView({ block: 'center' }))

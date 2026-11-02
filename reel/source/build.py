@@ -1,4 +1,4 @@
-"""Assemble Nook's demo reel: title cards and recorded scenes, 1080p30 H.264, silent."""
+"""Assemble Nook's demo reel: title cards and recorded scenes — a 4K master and a 1080p copy, 30 fps H.264, silent."""
 import pathlib
 import subprocess
 
@@ -7,10 +7,12 @@ SC = ROOT / 'scenes'
 TI = ROOT / 'titles'
 CLIPS = ROOT / 'clips'
 CLIPS.mkdir(exist_ok=True)
-OUT = pathlib.Path('/Users/lnu.ur/nook/reel/nook-demo-reel.mp4')
+OUT = pathlib.Path('/Users/lnu.ur/nook/reel/nook-demo-reel-4k.mp4')
+OUT_HD = pathlib.Path('/Users/lnu.ur/nook/reel/nook-demo-reel-1080p.mp4')
+SLOW = 3  # record.js ran the page this many times slower than real time
 OUT.parent.mkdir(exist_ok=True)
 
-ENC = ['-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', '30', '-movflags', '+faststart']
+ENC = ['-c:v', 'libx264', '-preset', 'medium', '-crf', '16', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-r', '30', '-movflags', '+faststart']
 
 
 def run(cmd):
@@ -30,7 +32,7 @@ def scene(name, trim_start=0.0, trim_end=None, hold=0.6):
     """Frames arrive only when the page repaints, each with its own timestamp —
     so every frame is shown for exactly as long as it was on screen."""
     rows = [l.split() for l in (SC / name / 'times.txt').read_text().splitlines() if l.strip()]
-    frames = [(SC / name / f, float(t)) for f, t in rows]
+    frames = [(SC / name / f, float(t) / SLOW) for f, t in rows]
     t0 = frames[0][1]
     frames = [(f, t - t0) for f, t in frames]
     if trim_end is not None:
@@ -49,7 +51,7 @@ def scene(name, trim_start=0.0, trim_end=None, hold=0.6):
     lines.append(f"file '{keep[-1][0]}'")  # concat demuxer needs the last file twice
     lst.write_text('\n'.join(lines) + '\n')
     out = CLIPS / f'{name}.mp4'
-    vf = f'fps=30,scale=1920:1080:flags=lanczos,format=yuv420p,fade=t=in:st=0:d=0.25,fade=t=out:st={total - 0.3:.2f}:d=0.3'
+    vf = f'fps=30,scale=3840:2160:flags=lanczos,format=yuv420p,fade=t=in:st=0:d=0.25,fade=t=out:st={total - 0.3:.2f}:d=0.3'
     run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(lst), '-vf', vf, *ENC, str(out)])
     return out, total
 
@@ -62,7 +64,7 @@ parts = [
     title('t4', 2.6), scene('04-aisle'),
     title('t5', 2.6), scene('05-tick', hold=0.4),
     # The website demo: from the moment sharing starts to the end of its loop.
-    title('t6', 2.6), scene('06-share', trim_start=4.9, trim_end=16.2, hold=0.3),
+    title('t6', 2.6), scene('06-share', trim_start=4.9, trim_end=15.4, hold=0.4),
     scene('07-site', hold=0.4),
     title('t7-outro', 4.6, fade_out=False),
 ]
@@ -70,10 +72,12 @@ parts = [
 listing = CLIPS / 'all.txt'
 listing.write_text(''.join(f"file '{p}'\n" for p, _ in parts))
 run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', str(listing), '-c', 'copy', '-movflags', '+faststart', str(OUT)])
+# The 1080p copy is downscaled from the 4K master, so it's sharper than a 1080p capture.
+run(['ffmpeg', '-y', '-i', str(OUT), '-vf', 'scale=1920:1080:flags=lanczos', '-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(OUT_HD)])
 
 # Timings for the voice-over script.
 t = 0.0
 for p, d in parts:
     print(f'{int(t // 60)}:{t % 60:05.2f}  {d:5.2f}s  {p.stem}')
     t += d
-print(f'total {t:.1f}s  ->  {OUT}')
+print(f'total {t:.1f}s  ->  {OUT}, {OUT_HD}')
