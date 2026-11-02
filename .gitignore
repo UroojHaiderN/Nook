@@ -31,3 +31,11 @@ dist-ssr
 # Local tooling
 supabase/.temp
 .claude/
+
+# Demo reel: keep the script and tools, not the renders
+reel/*.mp4
+reel/source/scenes/
+reel/source/titles/
+reel/source/clips/
+reel/source/node_modules/
+reel/source/peek/
