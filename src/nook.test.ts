@@ -17,6 +17,13 @@ import type { Piece } from './types'
 import { boardToRow, rowToBoard } from './backend'
 
 describe('parseItemInput', () => {
+  it('reads sizes however they are written', () => {
+    expect(parseItemInput('oat milk 5litre')).toMatchObject({ title: 'Oat milk', amount: '5l', qty: 1 })
+    expect(parseItemInput('2 liters milk')).toMatchObject({ title: 'Milk', amount: '2l', qty: 1 })
+    expect(parseItemInput('3 cheddar 400 grams')).toMatchObject({ title: 'Cheddar', amount: '400g', qty: 3 })
+    expect(parseItemInput('juice 1.5l')).toMatchObject({ amount: '1.5l' })
+  })
+
   it('pulls quantity, size and title out of one line', () => {
     expect(parseItemInput('2 rose lemonade 250ml')).toMatchObject({
       title: 'Rose lemonade',

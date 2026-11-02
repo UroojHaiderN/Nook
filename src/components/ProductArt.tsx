@@ -117,39 +117,57 @@ const shapes: Record<string, ReactElement> = {
   ),
 }
 
-/** A real product icon when one can be found, the drawing until then. */
+/**
+ * The product picture. A cached one shows at once; otherwise we wait a moment
+ * for it rather than flashing the drawing and swapping it a second later —
+ * that swap, card after card, is what made a fresh board look glitchy. The
+ * drawing only appears if no picture turns up (offline, or nothing matches).
+ */
+const PATIENCE_MS = 1500
+
 function useProductIcon(title?: string) {
   const [src, setSrc] = useState<string | null>(() => (title ? cachedProductIcon(title) : null))
+  const [gaveUp, setGaveUp] = useState(false)
 
   useEffect(() => {
-    if (!title) return
+    if (!title || src) return
     let alive = true
-    void resolveProductIcon(title).then((url) => alive && url && setSrc(url))
+    const timer = window.setTimeout(() => alive && setGaveUp(true), PATIENCE_MS)
+    void resolveProductIcon(title)
+      .then((url) => {
+        if (!alive) return
+        if (url) setSrc(url)
+        else setGaveUp(true)
+      })
+      .catch(() => alive && setGaveUp(true))
     return () => {
       alive = false
+      window.clearTimeout(timer)
     }
-  }, [title])
+  }, [title, src])
 
-  return src
+  return { src, gaveUp }
 }
 
 export default function ProductArt({ art, title, className }: Props) {
-  const icon = useProductIcon(title)
+  const { src, gaveUp } = useProductIcon(title)
+  const [wasCached] = useState(() => !!src)
 
-  if (icon)
+  if (src)
     return (
       <img
-        src={icon}
+        src={src}
         alt=""
         aria-hidden="true"
-        loading="lazy"
         decoding="async"
-        className={`${className ?? ''} animate-fade-in object-contain`}
+        className={`${className ?? ''} ${wasCached ? '' : 'animate-fade-in'} object-contain`}
       />
     )
 
+  if (title && !gaveUp) return <span className={className} aria-hidden="true" />
+
   return (
-    <svg viewBox="0 0 72 100" className={className} aria-hidden="true">
+    <svg viewBox="0 0 72 100" className={`${className ?? ''} animate-fade-in`} aria-hidden="true">
       {shapes[art] ?? shapes.bag}
     </svg>
   )

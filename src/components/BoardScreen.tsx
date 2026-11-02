@@ -198,7 +198,7 @@ export default function BoardScreen({
           embedded ? 'pt-7' : 'pt-[calc(var(--safe-top)+14px)] sm:pt-8'
         }`}
       >
-        <div className="relative mx-auto w-full max-w-5xl px-1 sm:px-0">
+        <div className="relative mx-auto w-full max-w-[1280px] px-1 sm:px-0">
         <div className="flex items-start justify-between gap-3">
           {embedded ? (
             <span />
@@ -246,16 +246,8 @@ export default function BoardScreen({
         </div>
 
         {embedded && (
-          <div className="mt-6 flex items-center gap-3">
-            <div className="flex h-[52px] min-w-0 flex-1 items-center gap-1.5 rounded-full bg-panel p-2 pl-5">
-              {addBar(false)}
-            </div>
-            <button
-              onClick={() => setAdding(true)}
-              className="tap h-[52px] shrink-0 rounded-full border border-hairline/15 px-5 text-[15px] text-ink hover:border-hairline/35"
-            >
-              Note or voice memo
-            </button>
+          <div className="mt-6 flex h-[52px] items-center gap-1.5 rounded-full bg-panel p-2 pl-5">
+            {addBar(false)}
           </div>
         )}
 
@@ -317,7 +309,7 @@ export default function BoardScreen({
 
       {/* Grid */}
       <main onScroll={onScroll} className="no-scrollbar flex-1 overflow-y-auto px-4 pb-[120px] pt-1 sm:px-8">
-        <div className="mx-auto w-full max-w-5xl">
+        <div className="mx-auto w-full max-w-[1280px]">
         {visible.length === 0 && adjusted ? (
           <div className="mt-10 max-w-md px-1">
             <p className="font-display text-[24px] tracking-[-0.02em] text-ink">All hidden away</p>
@@ -370,7 +362,7 @@ export default function BoardScreen({
                     {section.heading}
                   </h2>
                 )}
-                <div className="grid grid-flow-row-dense grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                <div className="grid grid-flow-row-dense grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                   {section.pieces.map((p) =>
                     p.kind === 'item' ? (
                       <ItemCard key={p.id} piece={p} />

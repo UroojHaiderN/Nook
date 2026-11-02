@@ -276,7 +276,7 @@ export default function ItemCard({ piece }: { piece: ItemPiece }) {
           aria-pressed={piece.done}
           className={`group/tick tap hit z-10 absolute bottom-3.5 left-3.5 grid h-[32px] w-[32px] place-items-center rounded-full transition-colors duration-200 ${
             piece.done
-              ? 'animate-check-in bg-cobalt text-on-ink'
+              ? `${cheer ? 'animate-check-in' : ''} bg-cobalt text-on-ink`
               : 'border-[1.5px] border-hairline/25 text-ink hover:border-hairline/50'
           }`}
         >
@@ -297,10 +297,6 @@ export default function ItemCard({ piece }: { piece: ItemPiece }) {
           onClose={() => setMenu(false)}
           actions={[
             { label: 'Edit', run: () => setEditing(true) },
-            {
-              label: piece.done ? 'Mark as still needed' : 'Mark as got',
-              run: tick,
-            },
             {
               label: 'Delete',
               destructive: true,

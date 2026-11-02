@@ -84,10 +84,13 @@ export default function NoteScreen({
   ]
 
   return (
-    <div className="absolute inset-0 z-30 flex flex-col overflow-hidden bg-canvas/75 backdrop-blur-2xl">
+    // Phone: the note fills the screen and the controls are a sheet at the
+    // bottom. Big screen: one centred column — buttons, a larger note, then the
+    // controls right under it — instead of a small note lost in a sea of blur.
+    <div className="absolute inset-0 z-30 flex flex-col overflow-hidden bg-canvas/75 backdrop-blur-2xl lg:justify-center lg:bg-canvas/85">
       {/* Canvas area */}
-      <div className="relative min-h-0 flex-1 overflow-hidden">
-        <div className="absolute inset-x-0 top-[calc(var(--safe-top)+12px)] mx-auto flex max-w-5xl items-center justify-between px-5 sm:top-6 sm:px-8">
+      <div className="relative min-h-0 flex-1 overflow-hidden lg:flex-none lg:overflow-visible">
+        <div className="absolute inset-x-0 top-[calc(var(--safe-top)+12px)] mx-auto flex max-w-5xl items-center justify-between px-5 sm:top-6 sm:px-8 lg:static lg:w-[560px] lg:px-0">
           <button
             onClick={onBack}
             aria-label="Back to board"
@@ -109,10 +112,10 @@ export default function NoteScreen({
           </button>
         </div>
 
-        <div className="flex h-full items-center justify-center pb-16">
+        <div className="flex h-full items-center justify-center pb-16 lg:h-auto lg:py-6">
           <div
-            className="relative animate-note-in rounded-[30px] shadow-sticky transition-colors duration-300"
-            style={{ width: W, height: H, background: skin.card, transform: 'rotate(-1deg)' }}
+            className="relative h-[240px] w-[300px] animate-note-in rounded-[30px] shadow-sticky transition-colors duration-300 lg:h-[416px] lg:w-[520px]"
+            style={{ background: skin.card, transform: 'rotate(-1deg)' }}
           >
             <div
               className="pointer-events-none absolute left-4 top-3.5 flex items-center gap-1.5 text-[12px] font-medium"
@@ -126,7 +129,7 @@ export default function NoteScreen({
               value={note.body}
               onChange={(e) => updateNote(note.id, { body: e.target.value })}
               aria-label="Note text"
-              className={`h-full w-full resize-none rounded-[23px] bg-transparent px-4 pb-4 pt-[36px] text-[18px] font-normal leading-[1.4] tracking-[-0.015em] outline-none ${
+              className={`h-full w-full resize-none rounded-[23px] bg-transparent px-4 pb-4 pt-[36px] text-[18px] font-normal leading-[1.4] tracking-[-0.015em] outline-none lg:px-7 lg:pt-[52px] lg:text-[24px] ${
                 drawing ? 'pointer-events-none' : ''
               }`}
               style={{ color: skin.ink }}
@@ -169,7 +172,7 @@ export default function NoteScreen({
       </div>
 
       {/* Control sheet */}
-      <div className="relative z-10 mx-auto w-full max-w-xl shrink-0 animate-sheet-up rounded-t-sheet bg-surface px-4 pb-[calc(var(--safe-bottom)+20px)] pt-5 shadow-lift sm:mb-6 sm:rounded-sheet">
+      <div className="relative z-10 mx-auto w-full max-w-xl shrink-0 animate-sheet-up rounded-t-sheet bg-surface px-4 pb-[calc(var(--safe-bottom)+20px)] pt-5 shadow-lift sm:mb-6 sm:rounded-sheet lg:mb-0 lg:w-[560px] lg:max-w-none lg:animate-pop-in lg:pb-5">
         <p className="px-1 text-[12px] font-medium text-muted">Note color</p>
         <div className="mt-2 flex items-center gap-2.5 px-1">
           {NOTE_COLORS.map((c) => (
