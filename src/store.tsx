@@ -154,6 +154,8 @@ type Ctx = {
   saveNow: (boardId: string) => Promise<boolean>
   /** Yours to delete, or someone else's to leave. */
   isOwner: (board: Board) => boolean
+  /** Deleted or left on this device just now — not a broken link. */
+  wasRemovedHere: (boardId: string) => boolean
   /** Keep a recording on this device and, with an account, share it with the board. */
   storeClip: (audioId: string, blob: Blob) => Promise<void>
   /** A recording from this device, or fetched from the board and kept here. */
@@ -187,6 +189,8 @@ export function BoardProvider({ children }: { children: ReactNode }) {
   const [{ boards, activeId }, setState] = useState<Saved>(load)
   const pushed = useRef<Record<string, number>>({})
   const sending = useRef<Record<string, number>>({})
+  const removedHere = useRef(new Set<string>())
+  const wasRemovedHere = useCallback((id: string) => removedHere.current.has(id), [])
   const [loadedFor, setLoadedFor] = useState<string | null>(null)
   const loading = backendConfigured && !!userId && loadedFor !== userId
 
@@ -497,6 +501,7 @@ export function BoardProvider({ children }: { children: ReactNode }) {
     (id: string) => {
       const gone = boards.find((b) => b.id === id)
       if (!gone) return
+      removedHere.current.add(id)
       const index = boards.indexOf(gone)
       setState((s) => ({
         boards: s.boards.filter((b) => b.id !== id),
@@ -745,6 +750,7 @@ export function BoardProvider({ children }: { children: ReactNode }) {
       resetLink,
       saveNow,
       isOwner,
+      wasRemovedHere,
       storeClip,
       loadClip,
       toggleDone,
@@ -775,6 +781,7 @@ export function BoardProvider({ children }: { children: ReactNode }) {
       resetLink,
       saveNow,
       isOwner,
+      wasRemovedHere,
       storeClip,
       loadClip,
       toggleDone,

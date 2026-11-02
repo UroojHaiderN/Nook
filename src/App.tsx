@@ -6,7 +6,7 @@ import NoteScreen from './components/NoteScreen'
 import AuthScreen, { NewPasswordScreen } from './components/AuthScreen'
 import Sidebar from './components/Sidebar'
 import ConfettiLayer from './components/Confetti'
-import { useBoard } from './store'
+import { pendingJoin, useBoard } from './store'
 import { useAccount } from './auth'
 import { useRoute } from './hooks'
 import { hideSplash } from './splash'
@@ -26,7 +26,7 @@ function useWideScreen() {
 }
 
 export default function App() {
-  const { boards, board, firstRun, toast, openBoard } = useBoard()
+  const { boards, board, firstRun, toast, openBoard, loading, say, wasRemovedHere } = useBoard()
   const { ready, userId, localOnly, recovering, offline } = useAccount()
   const [route, go] = useRoute()
   const wide = useWideScreen()
@@ -64,6 +64,16 @@ export default function App() {
     const latest = [...boards].sort((a, b) => b.updatedAt - a.updatedAt)[0]
     go({ boardId: latest.id, noteId: null }, true)
   }, [inApp, wide, route.boardId, boards, go])
+
+  // A link to a board that isn't here any more says so, instead of quietly
+  // landing on the boards list.
+  useEffect(() => {
+    if (!inApp || loading || !route.boardId || pendingJoin()) return
+    if (boards.some((b) => b.id === route.boardId)) return
+    if (!wasRemovedHere(route.boardId))
+      say('That board isn’t here — it may have been deleted, or you were taken off it')
+    go({ boardId: null, noteId: null }, true)
+  }, [inApp, loading, route.boardId, boards, go, say, wasRemovedHere])
 
   const onBoard = !!route.boardId && boards.some((b) => b.id === route.boardId)
   const noteId = onBoard ? route.noteId : null

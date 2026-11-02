@@ -47,6 +47,12 @@ export default {
           to: { transform: 'translateY(0)' },
         },
         'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
+        // Centred dialogs: the centring translate is part of every frame, so the
+        // dialog opens where it ends up instead of sliding in from off-centre.
+        'dialog-in': {
+          '0%': { transform: 'translate(-50%, -50%) scale(0.97)', opacity: '0' },
+          '100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '1' },
+        },
         'pop-in': {
           '0%': { transform: 'scale(0.9)', opacity: '0' },
           '65%': { transform: 'scale(1.04)', opacity: '1' },
@@ -109,6 +115,7 @@ export default {
         'sheet-up': 'sheet-up 360ms cubic-bezier(0.22, 1, 0.36, 1)',
         'fade-in': 'fade-in 240ms ease-out',
         'pop-in': 'pop-in 280ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'dialog-in': 'dialog-in 180ms ease-out',
         'check-in': 'check-in 340ms cubic-bezier(0.34, 1.56, 0.64, 1)',
         'note-in': 'note-in 420ms cubic-bezier(0.22, 1, 0.36, 1)',
         'toast-in': 'toast-in 2200ms ease-out forwards',

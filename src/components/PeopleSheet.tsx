@@ -64,7 +64,7 @@ export default function PeopleSheet({ onClose }: { onClose: () => void }) {
       <div
         role="dialog"
         aria-label={`Share ${board.title}`}
-        className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] flex max-h-[80%] animate-sheet-up flex-col rounded-sheet bg-surface p-5 pb-7 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[440px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-pop-in"
+        className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] flex max-h-[80%] animate-sheet-up flex-col rounded-sheet bg-surface p-5 pb-7 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[440px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-dialog-in"
       >
         <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-hairline/10" />
         <p className="font-display text-[24px] font-normal tracking-[-0.03em] text-ink">Share this board</p>

@@ -146,7 +146,7 @@ export default function AddSheet({
       <div
         role="dialog"
         aria-label="Add to board"
-        className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] animate-sheet-up rounded-sheet bg-surface p-5 pb-7 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[420px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-pop-in"
+        className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] animate-sheet-up rounded-sheet bg-surface p-5 pb-7 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[420px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-dialog-in"
       >
         <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-hairline/10" />
 

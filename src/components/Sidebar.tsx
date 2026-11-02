@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { PersonPlus, Plus, Trash } from './Icons'
+import { More, PersonPlus, Plus, Trash } from './Icons'
 import { Avatar } from './Chrome'
 import PieceMenu from './PieceMenu'
 import AccountMenu from './AccountMenu'
@@ -47,23 +47,32 @@ function Row({
 
   return (
     <>
-      <button
-        {...press.handlers}
-        onClick={() => !press.consumed() && onOpen()}
-        aria-current={active ? 'page' : undefined}
-        className={`flex w-full items-baseline gap-2 rounded-full px-4 py-2.5 text-left transition-colors ${
-          active ? 'bg-panel' : 'hover:bg-panel/60'
-        }`}
-      >
-        <span
-          className={`min-w-0 flex-1 truncate text-[15px] ${
-            active ? 'text-ink' : 'text-ink/70'
+      {/* The ⋯ appears on hover or focus, where the time sat: rename and delete
+          shouldn't depend on knowing to right-click. */}
+      <div className="group relative">
+        <button
+          {...press.handlers}
+          onClick={() => !press.consumed() && onOpen()}
+          aria-current={active ? 'page' : undefined}
+          className={`flex w-full items-baseline gap-2 rounded-full py-2.5 pl-4 pr-11 text-left transition-colors ${
+            active ? 'bg-panel' : 'hover:bg-panel/60'
           }`}
         >
-          {board.title}
+          <span className={`min-w-0 flex-1 truncate text-[15px] ${active ? 'text-ink' : 'text-ink/70'}`}>
+            {board.title}
+          </span>
+        </button>
+        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[12px] text-muted transition-opacity group-focus-within:opacity-0 group-hover:opacity-0">
+          {agoShort(board.updatedAt)}
         </span>
-        <span className="shrink-0 text-[12px] text-muted">{agoShort(board.updatedAt)}</span>
-      </button>
+        <button
+          onClick={() => setMenu(true)}
+          aria-label={`More for ${board.title}`}
+          className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full text-muted opacity-0 transition-opacity hover:bg-surface hover:text-ink focus:opacity-100 group-hover:opacity-100"
+        >
+          <More className="h-[18px] w-[18px]" />
+        </button>
+      </div>
 
       {menu && (
         <PieceMenu

@@ -38,7 +38,7 @@ export default function PieceMenu({
       <div
         role="menu"
         aria-label={title}
-        className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] animate-sheet-up overflow-hidden rounded-sheet bg-surface p-3 pb-4 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[380px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-pop-in"
+        className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] animate-sheet-up overflow-hidden rounded-sheet bg-surface p-3 pb-4 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[380px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-dialog-in"
       >
         <p className="font-display truncate px-2 pb-2 pt-2 text-[22px] font-normal tracking-[-0.03em] text-ink">{title}</p>
         {note && <p className="px-2 pb-4 text-[14px] leading-snug text-muted">{note}</p>}

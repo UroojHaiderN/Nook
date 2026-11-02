@@ -5,7 +5,8 @@ import VoiceCard from './VoiceCard'
 import AddSheet from './AddSheet'
 import PeopleSheet from './PeopleSheet'
 import { Avatar } from './Chrome'
-import { Back, PersonPlus, Plus, Tune } from './Icons'
+import { Back, More, PersonPlus, Plus, Trash, Tune } from './Icons'
+import PieceMenu from './PieceMenu'
 import { ShapeCluster } from './Shapes'
 import { ago, useBoard } from '../store'
 import { useEscape } from '../hooks'
@@ -33,13 +34,16 @@ export default function BoardScreen({
   /** Sitting beside the sidebar, where a back button points at nothing. */
   embedded?: boolean
 }) {
-  const { board, people, addItem, clearDone } = useBoard()
+  const { board, people, addItem, clearDone, renameBoard, deleteBoard, isOwner } = useBoard()
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('board')
   const [viewOpen, setViewOpen] = useState(false)
   const [hideDone, setHideDone] = useState(false)
   const [adding, setAdding] = useState(false)
   const [peopleOpen, setPeopleOpen] = useState(false)
+  const [boardMenu, setBoardMenu] = useState(false)
+  const [renaming, setRenaming] = useState(false)
+  const [draftTitle, setDraftTitle] = useState('')
   // Phone only: the large title folds into the top bar once you scroll. Two
   // thresholds, so a list just long enough to scroll doesn't flicker between.
   const [folded, setFolded] = useState(false)
@@ -58,6 +62,19 @@ export default function BoardScreen({
     else if (query) setQuery('')
     else onBack()
   }, !adding)
+
+  // "/" to start typing an item, as in most web apps with one main field.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey) return
+      const el = document.activeElement
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return
+      e.preventDefault()
+      inputRef.current?.focus()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   const pieces = useMemo(() => board?.pieces ?? [], [board?.pieces])
 
@@ -145,8 +162,20 @@ export default function BoardScreen({
         <Tune className="h-[19px] w-[19px]" />
         <span className="hidden sm:inline">View</span>
       </button>
+      <button
+        onClick={() => setBoardMenu(true)}
+        aria-label="More: rename or delete this board"
+        className="tap grid h-10 w-10 place-items-center rounded-full border border-hairline/15 text-ink hover:border-hairline/35"
+      >
+        <More className="h-[19px] w-[19px]" />
+      </button>
     </div>
   )
+
+  const saveTitle = () => {
+    if (board) renameBoard(board.id, draftTitle)
+    setRenaming(false)
+  }
 
   /** The add field, drawn for a light or a dark surface. */
   const addBar = (dark: boolean) => (
@@ -234,9 +263,30 @@ export default function BoardScreen({
         >
           <div className="flex items-end justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="mt-2 text-[36px] font-normal leading-[1.02] tracking-[-0.04em] text-ink sm:text-[48px]">
-                {board.title}
-              </h1>
+              {renaming ? (
+                <input
+                  autoFocus
+                  value={draftTitle}
+                  onChange={(e) => setDraftTitle(e.target.value)}
+                  onBlur={saveTitle}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveTitle()
+                    if (e.key === 'Escape') setRenaming(false)
+                  }}
+                  aria-label="Board name"
+                  className="font-display mt-2 w-full rounded-2xl bg-panel px-3 text-[36px] leading-[1.15] tracking-[-0.04em] text-ink outline-none sm:text-[48px]"
+                />
+              ) : (
+                <h1
+                  onDoubleClick={() => {
+                    setDraftTitle(board.title)
+                    setRenaming(true)
+                  }}
+                  className="mt-2 text-[36px] font-normal leading-[1.02] tracking-[-0.04em] text-ink sm:text-[48px]"
+                >
+                  {board.title}
+                </h1>
+              )}
               <p className="mt-1 text-[13px] text-muted">
                 {pieces.length === 0 ? 'Nothing on it yet' : `Updated ${ago(board.updatedAt)}`}
               </p>
@@ -402,6 +452,38 @@ export default function BoardScreen({
       )}
 
       {peopleOpen && <PeopleSheet onClose={() => setPeopleOpen(false)} />}
+
+      {boardMenu && (
+        <PieceMenu
+          title={board.title}
+          note={
+            !isOwner(board)
+              ? 'Leaving takes it off your list. It stays for everyone else.'
+              : board.joined?.length
+                ? 'Deleting removes it for everyone on it.'
+                : undefined
+          }
+          onClose={() => setBoardMenu(false)}
+          actions={[
+            {
+              label: 'Rename',
+              run: () => {
+                setDraftTitle(board.title)
+                setRenaming(true)
+              },
+            },
+            {
+              label: isOwner(board) ? 'Delete board' : 'Leave board',
+              destructive: true,
+              icon: <Trash className="h-[17px] w-[17px]" />,
+              run: () => {
+                deleteBoard(board.id)
+                onBack()
+              },
+            },
+          ]}
+        />
+      )}
 
       {adding && (
         <AddSheet

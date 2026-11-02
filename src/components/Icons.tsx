@@ -217,3 +217,11 @@ export const EyeOff = ({ className, strokeWidth = 1.6 }: P) => (
     </g>
   </svg>
 )
+
+export const More = ({ className }: P) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={base(className)}>
+    <circle cx="5.5" cy="12" r="1.7" />
+    <circle cx="12" cy="12" r="1.7" />
+    <circle cx="18.5" cy="12" r="1.7" />
+  </svg>
+)

@@ -31,7 +31,7 @@ function EditSheet({ piece, onClose }: { piece: ItemPiece; onClose: () => void }
       <div
         role="dialog"
         aria-label={`Edit ${piece.title}`}
-        className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] animate-sheet-up rounded-sheet bg-surface p-5 pb-7 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[420px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-pop-in"
+        className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] animate-sheet-up rounded-sheet bg-surface p-5 pb-7 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[420px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-dialog-in"
       >
         <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-hairline/10" />
         <p className="font-display mb-3 text-[22px] font-normal tracking-[-0.03em] text-ink">Edit item</p>
@@ -193,7 +193,8 @@ export default function ItemCard({ piece }: { piece: ItemPiece }) {
         }`}
       >
         <p
-          className={`pr-1 text-[17px] font-normal leading-[1.2] tracking-[-0.02em] ${
+          title={piece.title}
+          className={`line-clamp-2 pr-1 text-[17px] font-normal leading-[1.2] tracking-[-0.02em] ${
             piece.done ? 'text-muted line-through decoration-muted/70' : 'text-ink'
           }`}
         >
@@ -242,12 +243,9 @@ export default function ItemCard({ piece }: { piece: ItemPiece }) {
               className="text-muted"
             >
               {size}
-              {(piece.qty > 1 || !size) && (
-                <span
-                  className={`tabular-nums ${size ? 'ml-1.5' : ''} ${
-                    piece.qty > 1 ? 'font-medium text-ink/70' : 'text-muted/60'
-                  }`}
-                >
+              {/* Nothing to say about one of something with no size: say nothing. */}
+              {piece.qty > 1 && (
+                <span className={`font-medium tabular-nums text-ink/70 ${size ? 'ml-1.5' : ''}`}>
                   ×{piece.qty}
                 </span>
               )}
