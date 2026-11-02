@@ -42,17 +42,28 @@ type Saved = { boards: Board[]; activeId: string | null }
 const JOIN_KEY = 'nook.join.v1'
 type PendingJoin = { board: string; token: string } | { code: string }
 
-if (backendConfigured) {
+/** Fired when an invite arrives in a page that's already open. */
+export const JOIN_EVENT = 'nook:invite'
+
+/**
+ * Keep an invite from the address bar. Runs once at load, and again whenever
+ * the address changes — an invite pasted into a tab where Nook is already open
+ * doesn't reload the page, so a load-time check alone would miss it.
+ */
+function captureJoin() {
+  if (!backendConfigured) return
   const long = location.hash.match(/^#\/join\/([\w-]+)\/([a-z0-9]+)/i)
   const short = long ? null : location.hash.match(/^#\/join\/(?:[a-z0-9-]*-)?([a-z0-9]{8,})\/?$/i)
-  if (long || short) {
-    localStorage.setItem(
-      JOIN_KEY,
-      JSON.stringify(long ? { board: long[1], token: long[2] } : { code: short![1].toLowerCase() }),
-    )
-    history.replaceState(null, '', `${location.pathname}${location.search}#/`)
-  }
+  if (!long && !short) return
+  localStorage.setItem(
+    JOIN_KEY,
+    JSON.stringify(long ? { board: long[1], token: long[2] } : { code: short![1].toLowerCase() }),
+  )
+  history.replaceState(null, '', `${location.pathname}${location.search}#/`)
+  window.dispatchEvent(new Event(JOIN_EVENT))
 }
+captureJoin()
+window.addEventListener('hashchange', captureJoin)
 
 /** Recordings made while offline, waiting to be shared with their board. */
 const UPLOADS_KEY = 'nook.uploads.v1'
@@ -444,9 +455,12 @@ export function BoardProvider({ children }: { children: ReactNode }) {
     const patience = window.setTimeout(() => setLoadedFor(userId), 4000)
     const again = () => document.visibilityState === 'visible' && void pull(false)
     document.addEventListener('visibilitychange', again)
+    const invited = () => void pull(false)
+    window.addEventListener(JOIN_EVENT, invited)
     const timer = window.setInterval(again, 15_000)
     return () => {
       document.removeEventListener('visibilitychange', again)
+      window.removeEventListener(JOIN_EVENT, invited)
       window.clearInterval(timer)
       window.clearTimeout(patience)
     }

@@ -4,7 +4,7 @@ import { Circle, Flower, Square, Triangle } from './Shapes'
 import { Buddy } from '../landing/Buddies'
 import { useAccount } from '../auth'
 import { isEmail } from '../types'
-import { pendingJoin } from '../store'
+import { JOIN_EVENT, pendingJoin } from '../store'
 
 type Mode = 'in' | 'up' | 'forgot' | 'check-signup' | 'check-reset'
 
@@ -18,11 +18,21 @@ const MIN_PASSWORD = 8
 export default function AuthScreen() {
   const { signIn, signUp, sendReset, resendConfirm } = useAccount()
   // Someone arriving from a board link most likely has no account yet.
-  const [invited] = useState(() => pendingJoin() !== null)
+  const [invited, setInvited] = useState(() => pendingJoin() !== null)
   // nook…/signup and nook…/login land here as #/signup and #/login.
   const [mode, setMode] = useState<Mode>(() =>
     location.hash.startsWith('#/login') ? 'in' : invited || location.hash.startsWith('#/signup') ? 'up' : 'in',
   )
+  // An invite opened in this tab while it's already showing sign-in.
+  useEffect(() => {
+    const arrived = () => {
+      setInvited(true)
+      setMode('up')
+    }
+    window.addEventListener(JOIN_EVENT, arrived)
+    return () => window.removeEventListener(JOIN_EVENT, arrived)
+  }, [])
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)

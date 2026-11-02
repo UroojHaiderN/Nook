@@ -172,7 +172,7 @@ function Clip({ clip, person }: { clip: VoiceClip; person?: Member }) {
         </span>
       </button>
 
-      <div className="flex h-7 flex-1 items-center gap-[2px] overflow-hidden">
+      <div className="flex h-7 flex-1 items-center justify-between gap-[2px] overflow-hidden">
         {clip.wave.map((h, i) => {
           const passed = progress > 0 && (i + 1) / clip.wave.length <= progress
           const head = Math.floor(progress * clip.wave.length)
@@ -213,7 +213,7 @@ export default function VoiceCard({ piece }: { piece: VoicePiece }) {
     <>
       <div
         {...press.handlers}
-        className="liftable col-span-2 flex flex-col gap-1 rounded-card border border-hairline/[0.14] bg-surface px-4 py-2.5"
+        className="liftable col-span-2 flex flex-col justify-center gap-1 rounded-card border border-hairline/[0.14] bg-surface px-4 py-2.5 sm:px-5"
       >
         {piece.clips.map((clip) => (
           <Clip key={clip.id} clip={clip} person={people.find((p) => p.id === clip.authorId)} />
