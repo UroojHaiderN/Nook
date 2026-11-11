@@ -190,7 +190,7 @@ const FINGER = `(() => {
 
   // 6. Outro
   await app.evaluate(() => window.__show(false))
-  await stage(() => card(`${buddiesHtml(130, '#FAF6EE')}<h1>${words('Nook')}</h1><p>the shopping list the whole house can see</p><div class="pill">free · link in bio</div>`, '#FAF6EE'))
+  await stage(() => card(`${buddiesHtml(130, '#FAF6EE')}<h1>${words('Nook')}</h1><p>the shopping list the whole house can see</p><div class="pill">free</div>`, '#FAF6EE'))
   await sleep(2800)
 
   await cdp.send('Page.stopScreencast')
