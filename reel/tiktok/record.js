@@ -139,30 +139,30 @@ const FINGER = `(() => {
   await sleep(150)
 
   // 1. Hook
-  await stage(() => card(`${buddiesHtml(150, '#DBB8F2')}<h1>${words('POV: you’re the only one who ever remembers the shopping')}</h1>`, '#DBB8F2'))
+  await stage(() => card(`${buddiesHtml(150, '#DCD3FF')}<h1>${words('POV: you’re the only one who ever remembers the shopping')}</h1>`, '#DCD3FF'))
   await sleep(2500)
-  await stage(() => card(`<h1>${words('so I made a list the whole house can see 👀')}</h1>`, '#E2F16B'))
+  await stage(() => card(`<h1>${words('so I made a list the whole house can see 👀')}</h1>`, '#FFE08A'))
   await sleep(1800)
   await stage(() => card(null))
-  await stage(() => bgColor('#E2F16B'))
+  await stage(() => bgColor('#FFE08A'))
   await sleep(300)
 
   // 2. Typing
-  await stage(() => caption('just type it like a text ✍️', 'ink', -2))
+  await stage(() => caption('just type it like a text\u00a0✍️', 'ink', -2))
   await app.evaluate(() => window.__show(true))
   for (const item of ['6 eggs', 'oat milk', '2 lemons', 'bananas']) await type(item)
-  await stage(() => caption('it finds the pics 🍋', 'white', 2))
+  await stage(() => caption('it finds the pics\u00a0🍋', 'white', 2))
   await sleep(1300)
 
   // 3. By aisle
-  await stage(() => caption('…and sorts it by aisle 🛒', 'cobalt', -3))
+  await stage(() => caption('…and sorts it by aisle\u00a0🛒', 'cobalt', -3))
   await tap(app.getByRole('button', { name: /^View options/ }), 450)
   await tap(app.getByRole('button', { name: 'By aisle' }), 700)
   await tap(app.getByRole('button', { name: /^View options/ }), 900)
 
   // 4. Share
-  await stage(() => bgColor('#DBB8F2'))
-  await stage(() => caption('send the house the link 🔗', 'lime', 2))
+  await stage(() => bgColor('#DCD3FF'))
+  await stage(() => caption('send the house the link\u00a0🔗', 'lime', 2))
   // Point and tap at Share, but show the share sheet on the stage: this local
   // copy runs without accounts, and its real sheet says so.
   await point(app.getByRole('button', { name: /^Share/ }))
@@ -175,21 +175,22 @@ const FINGER = `(() => {
   await stage(() => share('off'))
   await sleep(350)
   await stage(() => toast('Mum joined the board 💜'))
+  await stage(() => avatar(true))
   await sleep(1400)
   await stage(() => toast(null))
 
   // 5. Tick it off
-  await stage(() => bgColor('#E2F16B'))
-  await stage(() => caption('tick it off together ✅', 'ink', -2))
+  await stage(() => bgColor('#FFE08A'))
+  await stage(() => caption('tick it off together\u00a0✅', 'ink', -2))
   for (const t of ['Lemons', 'Bananas', 'Eggs', 'Oat milk']) {
     await tap(app.getByLabel(`Mark ${t} as got`), 420)
   }
-  await stage(() => caption('clear the list = tiny party 🎉', 'lilac', 3))
+  await stage(() => caption('clear the list = tiny party\u00a0🎉', 'lilac', 3))
   await sleep(1700)
 
   // 6. Outro
   await app.evaluate(() => window.__show(false))
-  await stage(() => card(`${buddiesHtml(130, '#FFFFFF')}<h1>${words('Nook')}</h1><p>the shopping list the whole house can see</p><div class="pill">free · link in bio</div>`, '#FFFFFF'))
+  await stage(() => card(`${buddiesHtml(130, '#FAF6EE')}<h1>${words('Nook')}</h1><p>the shopping list the whole house can see</p><div class="pill">free · link in bio</div>`, '#FAF6EE'))
   await sleep(2800)
 
   await cdp.send('Page.stopScreencast')

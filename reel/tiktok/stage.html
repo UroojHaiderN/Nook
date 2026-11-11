@@ -4,37 +4,37 @@
     <meta charset="utf-8" />
     <title>Nook TikTok stage</title>
     <style>
-      @font-face { font-family: Brico; src: url(/node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-opsz-normal.woff2) format('woff2'); font-weight: 200 800; }
-      @font-face { font-family: DMS; src: url(/node_modules/@fontsource-variable/dm-sans/files/dm-sans-latin-opsz-normal.woff2) format('woff2'); font-weight: 100 1000; }
+      /* The app's own type: SF Pro, as on an iPhone. */
+      :root { --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif; --text: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; }
       * { box-sizing: border-box; }
       html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; }
-      body { font-family: DMS, sans-serif; background: #E2F16B; transition: background-color .45s ease; position: relative; }
+      body { font-family: var(--text); background: #FFE08A; transition: background-color .45s ease; position: relative; }
 
       /* The phone, in the middle third — clear of TikTok's buttons on the right and caption at the bottom. */
-      .phone { position: absolute; left: 166px; top: 392px; width: 748px; height: 1308px; border-radius: 74px; background: #111; padding: 14px; box-shadow: 0 50px 90px -30px rgba(17,17,17,.45); transform-origin: 50% 40%; transition: transform .6s cubic-bezier(.3,1.4,.5,1); }
+      .phone { position: absolute; left: 166px; top: 392px; width: 748px; height: 1308px; border-radius: 74px; background: #111; padding: 14px; box-shadow: 0 50px 90px -30px rgba(28,28,30,.4); transform-origin: 50% 40%; transition: transform .6s cubic-bezier(.3,1.4,.5,1); }
       .phone.out { transform: translateY(120%) rotate(6deg); }
-      .screen { position: relative; width: 720px; height: 1280px; border-radius: 60px; overflow: hidden; background: #fff; }
-      .screen iframe { border: 0; width: 432px; height: 768px; transform: scale(1.6667); transform-origin: 0 0; display: block; }
+      .screen { position: relative; width: 720px; height: 1280px; border-radius: 60px; overflow: hidden; background: #FAF6EE; }
+      .screen iframe { border: 0; width: 360px; height: 640px; transform: scale(2); transform-origin: 0 0; display: block; }
 
       /* Sticker captions, top of frame. */
       .cap { position: absolute; left: 0; right: 0; top: 150px; display: flex; justify-content: center; pointer-events: none; }
-      .sticker { font-family: Brico; font-weight: 800; font-size: 76px; line-height: 1.02; letter-spacing: -0.03em; padding: 26px 40px 30px; border-radius: 34px; max-width: 900px; text-align: center; box-shadow: 0 16px 0 -4px rgba(17,17,17,.9); opacity: 0; transform: scale(.6) rotate(-6deg); }
+      .sticker { font-family: var(--display); font-weight: 800; font-size: 70px; line-height: 1.06; letter-spacing: -0.025em; padding: 26px 40px 30px; border-radius: 34px; max-width: 940px; text-align: center; box-shadow: 0 18px 40px -12px rgba(28,28,30,.35); opacity: 0; transform: scale(.6) rotate(-6deg); }
       .sticker.show { animation: pop .5s cubic-bezier(.3,1.6,.5,1) forwards; }
       .sticker.hide { animation: unpop .25s ease-in forwards; }
       @keyframes pop { to { opacity: 1; transform: scale(1) rotate(var(--r, -2deg)); } }
       @keyframes unpop { from { opacity: 1; transform: scale(1) rotate(var(--r, -2deg)); } to { opacity: 0; transform: scale(.8) rotate(var(--r, -2deg)); } }
-      .ink { background: #111; color: #fff; }
-      .lime { background: #E2F16B; color: #111; border: 6px solid #111; }
-      .lilac { background: #DBB8F2; color: #111; border: 6px solid #111; }
-      .cobalt { background: #4450D6; color: #fff; border: 6px solid #111; }
-      .white { background: #fff; color: #111; border: 6px solid #111; }
+      .ink { background: #1C1C1E; color: #fff; }
+      .lime { background: #FCD34D; color: #1C1C1E; }
+      .lilac { background: #C4B5FD; color: #1C1C1E; }
+      .cobalt { background: #6366F1; color: #fff; }
+      .white { background: #fff; color: #1C1C1E; }
 
       /* Full-screen cards for the hook and the end. */
       .card { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 80px 220px; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
       .card.show { opacity: 1; }
-      .card h1 { font-family: Brico; font-weight: 800; letter-spacing: -0.035em; margin: 0; line-height: .98; font-size: 112px; }
+      .card h1 { font-family: var(--display); font-weight: 800; letter-spacing: -0.03em; margin: 0; line-height: 1.02; font-size: 108px; }
       .card p { font-size: 46px; margin: 34px 0 0; opacity: .75; line-height: 1.25; }
-      .card .pill { font: 600 44px DMS; background: #111; color: #fff; border-radius: 999px; padding: 20px 44px; margin-top: 42px; opacity: 1; }
+      .card .pill { font: 600 44px var(--text); background: #1C1C1E; color: #fff; border-radius: 999px; padding: 20px 44px; margin-top: 42px; opacity: 1; }
       .card .word { transform: scale(.4); opacity: 0; display: inline-block; }
       .card.show .word { animation: word .45s cubic-bezier(.3,1.6,.5,1) forwards; }
       @keyframes word { to { transform: none; opacity: 1; } }
@@ -46,16 +46,16 @@
       /* Share sheet and toast, drawn over the phone screen the way the app draws them. */
       .sheet { position: absolute; left: 30px; right: 30px; bottom: 30px; background: #fff; border-radius: 52px; padding: 46px 44px 50px; box-shadow: 0 30px 70px -20px rgba(17,17,17,.5); transform: translateY(115%); transition: transform .5s cubic-bezier(.3,1.2,.5,1); }
       .sheet.show { transform: none; }
-      .sheet h3 { font-family: Brico; font-weight: 800; letter-spacing: -0.03em; font-size: 50px; margin: 0; }
+      .sheet h3 { font-family: var(--display); font-weight: 650; letter-spacing: -0.02em; font-size: 46px; margin: 0; }
       .sheet .sub { font-size: 28px; color: #6b6b70; margin: 12px 0 0; }
-      .sheet .link { margin-top: 32px; display: flex; align-items: center; gap: 16px; background: #F2F2F5; border-radius: 999px; padding: 12px 12px 12px 32px; font-size: 28px; }
+      .sheet .link { margin-top: 32px; display: flex; align-items: center; gap: 16px; background: #F4EFE5; border-radius: 26px; padding: 12px 12px 12px 32px; font-size: 28px; }
       .sheet .link span { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-      .sheet .btn { background: #111; color: #fff; border-radius: 999px; padding: 22px 36px; font-weight: 600; transition: background-color .2s, color .2s; }
-      .sheet .btn.done { background: #E2F16B; color: #111; }
+      .sheet .btn { background: #1C1C1E; color: #fff; border-radius: 20px; padding: 22px 36px; font-weight: 600; transition: background-color .2s, color .2s; }
+      .sheet .btn.done { background: #34C759; color: #fff; }
       .toast { position: absolute; left: 0; right: 0; bottom: 170px; display: flex; justify-content: center; opacity: 0; transform: translateY(20px); transition: all .3s ease; pointer-events: none; }
       .toast.show { opacity: 1; transform: none; }
-      .toast span { background: #111; color: #fff; border-radius: 999px; padding: 22px 38px; font-size: 32px; font-weight: 500; }
-      .avatar { position: absolute; right: 150px; top: 46px; width: 64px; height: 64px; border-radius: 50%; background: #DBB8F2; border: 5px solid #fff; display: grid; place-items: center; font: 600 28px DMS; transform: scale(0); transition: transform .5s cubic-bezier(.3,1.6,.5,1); }
+      .toast span { background: #1C1C1E; color: #fff; border-radius: 999px; padding: 22px 38px; font-size: 32px; font-weight: 500; }
+      .avatar { position: absolute; right: 202px; top: 26px; width: 60px; height: 60px; border-radius: 50%; background: #C4B5FD; border: 4px solid #FAF6EE; display: grid; place-items: center; font: 600 24px var(--text); transform: scale(0); transition: transform .5s cubic-bezier(.3,1.6,.5,1); }
       .avatar.show { transform: scale(1); }
 
       .floaters svg { position: absolute; }
@@ -83,23 +83,23 @@
 
     <script>
       const shapes = {
-        tri: (f = '#E2F16B') => `<svg viewBox="0 0 100 100" width="S" height="S"><path d="M50 6 L96 90 Q97 94 92 94 L8 94 Q3 94 4 90 Z" fill="${f}"/>${face(50, 66, '#111')}</svg>`,
-        square: () => `<svg viewBox="0 0 100 100" width="S" height="S"><rect x="8" y="8" width="84" height="84" rx="10" fill="#F0582F"/>${face(50, 50, '#111')}</svg>`,
-        circle: () => `<svg viewBox="0 0 100 100" width="S" height="S"><circle cx="50" cy="50" r="44" fill="#4450D6"/>${face(50, 50, '#fff')}</svg>`,
-        flower: (f = '#DBB8F2') => `<svg viewBox="0 0 100 100" width="S" height="S"><g fill="${f}"><circle cx="50" cy="26" r="24"/><circle cx="74" cy="50" r="24"/><circle cx="50" cy="74" r="24"/><circle cx="26" cy="50" r="24"/><circle cx="50" cy="50" r="22"/></g>${face(50, 52, '#111')}</svg>`,
+        tri: (f = '#FCD34D') => `<svg viewBox="0 0 100 100" width="S" height="S"><path d="M50 6 L96 90 Q97 94 92 94 L8 94 Q3 94 4 90 Z" fill="${f}"/>${face(50, 66, '#111')}</svg>`,
+        square: () => `<svg viewBox="0 0 100 100" width="S" height="S"><rect x="8" y="8" width="84" height="84" rx="10" fill="#F87171"/>${face(50, 50, '#111')}</svg>`,
+        circle: () => `<svg viewBox="0 0 100 100" width="S" height="S"><circle cx="50" cy="50" r="44" fill="#6366F1"/>${face(50, 50, '#fff')}</svg>`,
+        flower: (f = '#C4B5FD') => `<svg viewBox="0 0 100 100" width="S" height="S"><g fill="${f}"><circle cx="50" cy="26" r="24"/><circle cx="74" cy="50" r="24"/><circle cx="50" cy="74" r="24"/><circle cx="26" cy="50" r="24"/><circle cx="50" cy="50" r="22"/></g>${face(50, 52, '#111')}</svg>`,
       }
       function face(x, y, ink) {
         return `<g transform="translate(${x} ${y})" fill="${ink}" stroke="${ink}"><ellipse cx="-11" cy="-6" rx="4.4" ry="5.6" stroke="none"/><ellipse cx="11" cy="-6" rx="4.4" ry="5.6" stroke="none"/><path d="M-8 6 q8 8 16 0" fill="none" stroke-width="3.4" stroke-linecap="round"/></g>`
       }
       const shape = (k, size, extra = '', fill) => shapes[k](fill).replaceAll('width="S" height="S"', `width="${size}" height="${size}" ${extra}`)
-      // On a lime or lilac card, the shape of that colour turns white so it doesn't vanish.
+      // On an amber or lavender card, the shape of that colour turns white so it doesn't vanish.
       const buddies = (size = 130, bg = '#FFFFFF') => {
-        const fill = (k) => (k === 'tri' && bg === '#E2F16B') || (k === 'flower' && bg === '#DBB8F2') ? '#FFFFFF' : undefined
+        const fill = (k) => (k === 'tri' && bg === '#FFE08A') || (k === 'flower' && bg === '#DCD3FF') ? '#FFFFFF' : undefined
         return `<div class="buddies">${['tri', 'square', 'circle', 'flower'].map((k, i) => `<span class="bob" style="animation-delay:${i * 0.18}s">${shape(k, k === 'square' ? size * 0.88 : size, '', fill(k))}</span>`).join('')}</div>`
       }
 
       // Shapes drifting around the phone.
-      // The background flips between lime and lilac, so the floaters are the two
+      // The background flips between amber and lavender, so the floaters are the two
       // colours that show on both, plus white versions of the other two.
       document.getElementById('floaters').innerHTML = [
         ['circle', 116, 'left:44px;top:300px'],
