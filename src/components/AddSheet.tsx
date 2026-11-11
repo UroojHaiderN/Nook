@@ -152,7 +152,7 @@ export default function AddSheet({
 
         {mode === 'pick' && (
           <>
-            <p className="font-display mb-4 text-[24px] font-normal tracking-[-0.03em] text-ink">Add to this board</p>
+            <p className="mb-4 text-[20px] font-semibold tracking-[-0.02em] text-ink">Add to this board</p>
             <div className="grid grid-cols-3 gap-2.5">
               {choices.map((c) => (
                 <button
@@ -180,7 +180,7 @@ export default function AddSheet({
 
         {mode === 'item' && (
           <>
-            <p className="font-display mb-4 text-[24px] font-normal tracking-[-0.03em] text-ink">What do you need?</p>
+            <p className="mb-4 text-[20px] font-semibold tracking-[-0.02em] text-ink">What do you need?</p>
             <input
               ref={inputRef}
               value={text}
@@ -200,7 +200,7 @@ export default function AddSheet({
             <div className="mt-4 flex gap-2">
               <button
                 onClick={() => setMode('pick')}
-                className="tap h-11 flex-1 rounded-full bg-panel text-[15px] font-medium text-ink"
+                className="tap h-12 flex-1 rounded-[16px] bg-panel text-[15px] font-medium text-ink"
               >
                 Back
               </button>
@@ -211,7 +211,7 @@ export default function AddSheet({
                   clearSeed()
                   onClose()
                 }}
-                className="tap h-11 flex-1 rounded-full bg-ink text-[15px] text-on-ink disabled:opacity-30"
+                className="tap h-12 flex-1 rounded-[16px] bg-ink font-medium text-[15px] text-on-ink disabled:opacity-30"
               >
                 Add item
               </button>
@@ -221,7 +221,7 @@ export default function AddSheet({
 
         {mode === 'voice' && (
           <>
-            <p className="font-display mb-4 text-[24px] font-normal tracking-[-0.03em] text-ink">
+            <p className="mb-4 text-[20px] font-semibold tracking-[-0.02em] text-ink">
               {recording ? 'Listening…' : arming ? 'Waiting for the microphone…' : 'Record a voice note'}
             </p>
             {/* Bars follow the real input level, so you can see the mic is live. */}
@@ -254,14 +254,14 @@ export default function AddSheet({
             <div className="mt-4 flex gap-2">
               <button
                 onClick={() => (recording ? discardRecording() : setMode('pick'))}
-                className="tap h-11 flex-1 rounded-full bg-panel text-[15px] font-medium text-ink"
+                className="tap h-12 flex-1 rounded-[16px] bg-panel text-[15px] font-medium text-ink"
               >
                 {recording ? 'Discard' : 'Back'}
               </button>
               <button
                 disabled={arming}
                 onClick={() => (recording ? finishRecording() : beginRecording())}
-                className="tap h-11 flex-1 rounded-full bg-ink text-[15px] text-on-ink disabled:opacity-40"
+                className="tap h-12 flex-1 rounded-[16px] bg-ink font-medium text-[15px] text-on-ink disabled:opacity-40"
               >
                 {recording ? 'Stop & add' : arming ? 'Allow access…' : micDenied ? 'Try again' : 'Start'}
               </button>

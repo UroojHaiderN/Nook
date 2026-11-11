@@ -6,17 +6,6 @@ import { agoShort, useBoard } from '../store'
 import { useLongPress } from '../hooks'
 import { colorOf, type NotePiece } from '../types'
 
-/**
- * Between −1° and +1°, fixed per note. Enough to read as paper; any more and a
- * wide block of colour looks dropped rather than placed.
- */
-const tiltFor = (id: string) => {
-  let hash = 0
-  for (const ch of id) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0
-  const t = ((hash % 1000) / 1000) * 2 - 1
-  return `${Math.abs(t) < 0.5 ? (t < 0 ? -0.5 : 0.5) : t.toFixed(2)}deg`
-}
-
 export default function NoteCard({
   piece,
   onOpen,
@@ -34,54 +23,46 @@ export default function NoteCard({
 
   return (
     <>
+      {/* A tinted row: the colour says "note", the text is the note. */}
       <div
         role="button"
         tabIndex={0}
         {...press.handlers}
         onClick={() => !press.consumed() && onOpen(piece.id)}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen(piece.id)}
-        className={`paper liftable relative flex h-[148px] cursor-pointer flex-col overflow-hidden rounded-card p-4 ${
-          fresh ? 'animate-pop-in' : ''
+        className={`tap flex min-h-[60px] cursor-pointer items-center gap-3 rounded-[22px] px-4 py-3 ${
+          fresh ? 'animate-fade-in' : ''
         }`}
-        style={{ background: skin.card, '--tilt': tiltFor(piece.id) } as React.CSSProperties}
+        style={{ background: skin.card }}
       >
-        {/* The paper colour says "note". Everything else is the note itself. */}
-        <div className="flex items-center justify-end gap-1.5">
-          {author && author.status !== 'you' && <Avatar person={author} size={16} />}
-          <span className="text-[11px]" style={{ color: skin.ink, opacity: 0.45 }}>
-            {agoShort(piece.createdAt)}
-          </span>
-        </div>
-
+        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: skin.dot }} aria-hidden="true" />
         <p
-          className="mt-1.5 line-clamp-4 text-[16px] font-normal leading-[1.35] tracking-[-0.015em]"
+          className="line-clamp-2 min-w-0 flex-1 text-[16px] leading-[1.35] tracking-[-0.01em]"
           style={{ color: skin.ink }}
         >
-          {piece.body || 'Add text to this note'}
+          {piece.body || (strokes.length ? 'A drawing' : 'Add text to this note')}
         </p>
 
-        {/* Anything drawn on the note shows here too, or the card would lie about it. */}
+        {/* Anything drawn on the note shows here too, or the row would lie about it. */}
         {strokes.length > 0 && (
           <svg
             viewBox="0 0 300 240"
-            preserveAspectRatio="xMidYMid slice"
-            className="pointer-events-none absolute inset-0 h-full w-full opacity-70"
+            preserveAspectRatio="xMidYMid meet"
+            className="pointer-events-none h-[36px] w-[44px] shrink-0 rounded-lg bg-white/60"
             aria-hidden="true"
           >
             {strokes.map((d, i) => (
-              <path
-                key={i}
-                d={d}
-                fill="none"
-                stroke={skin.ink}
-                strokeWidth="2.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              <path key={i} d={d} fill="none" stroke={skin.ink} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
             ))}
           </svg>
         )}
 
+        <span className="flex shrink-0 items-center gap-1.5">
+          {author && author.status !== 'you' && <Avatar person={author} size={18} />}
+          <span className="font-mono text-[12px]" style={{ color: skin.ink, opacity: 0.5 }}>
+            {agoShort(piece.createdAt)}
+          </span>
+        </span>
       </div>
 
       {menu && (

@@ -96,8 +96,8 @@ export default function NoteScreen({
             aria-label="Back to board"
             className="tap -ml-1.5 grid h-11 w-11 place-items-center rounded-full"
           >
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-ink text-on-ink">
-              <Back className="h-[18px] w-[18px]" strokeWidth={2} />
+            <span className="grid h-9 w-9 place-items-center rounded-full text-muted">
+              <Back className="h-[22px] w-[22px]" strokeWidth={2} />
             </span>
           </button>
           <button
@@ -106,7 +106,7 @@ export default function NoteScreen({
               onBack()
             }}
             aria-label="Delete note"
-            className="tap -mr-2 grid h-11 w-11 place-items-center rounded-full bg-surface text-muted shadow-card"
+            className="tap -mr-2 grid h-11 w-11 place-items-center rounded-full text-muted hover:text-danger"
           >
             <Trash className="h-[19px] w-[19px]" />
           </button>
@@ -195,7 +195,7 @@ export default function NoteScreen({
               key={a.label}
               onClick={a.run}
               className={`tap flex h-[60px] flex-col items-center justify-center gap-1.5 rounded-[20px] text-[13px] transition-colors ${
-                a.active ? 'bg-ink text-on-ink' : 'bg-panel text-ink'
+                a.active ? 'bg-cobalt text-white' : 'bg-panel text-ink'
               }`}
             >
               {a.icon}

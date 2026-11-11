@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
  * The colours are the note papers already in the app — nothing new, just the
  * same pastels flying about.
  */
-const PAPERS = ['#E2F16B', '#DBB8F2', '#4450D6', '#F0582F']
+const PAPERS = ['#FCD34D', '#A78BFA', '#6366F1', '#F87171', '#34D399']
 
 type Piece = {
   dx: number

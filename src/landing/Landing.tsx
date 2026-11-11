@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import ProductArt from '../components/ProductArt'
 import ConfettiLayer, { celebrateFrom } from '../components/Confetti'
-import { Check, Link, Plus } from '../components/Icons'
+import { Link, Plus } from '../components/Icons'
 import { parseItemInput } from '../parse'
 import { Buddy } from './Buddies'
 
@@ -234,22 +234,29 @@ function Demo() {
         <Buddy kind="flower" size={58} className="absolute -bottom-8 -left-3 z-10" delay={1} mood="wow" />
 
         <div
-          className="relative overflow-hidden rounded-[34px] bg-panel p-4 sm:p-5"
+          className="relative overflow-hidden rounded-[34px] bg-[#F1EADC] p-3 sm:p-4"
           role="img"
           aria-label="Nook in action: adding eggs and oat milk, sharing the board, and ticking everything off"
         >
-          {/* Header */}
-          <div className="mb-4 flex items-center justify-between px-1">
-            <div>
-              <p className="font-display text-[26px] leading-none tracking-[-0.03em] text-ink">Saturday shop</p>
-              <p className="mt-1.5 text-[12px] text-muted">Updated just now</p>
+          {/* Header card: the board and how much is left, as in the app */}
+          <div className="flex items-center gap-3 rounded-[22px] bg-surface p-3.5">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-[#FBBF24]">
+              <svg viewBox="0 0 40 40" width="38" height="38" aria-hidden="true">
+                <path d="M20 9l12 21H8L20 9z" fill="#fff" />
+              </svg>
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[19px] font-semibold leading-tight tracking-[-0.02em] text-ink">Saturday shop</p>
+              <p className="mt-0.5 text-[12px] text-muted">
+                {shown.filter((i) => !i.done).length ? `${shown.filter((i) => !i.done).length} to get` : 'All got'} · Updated just now
+              </p>
             </div>
             <div className="flex -space-x-2">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-ink text-[12px] text-on-ink ring-2 ring-panel">
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-[11px] text-on-ink ring-2 ring-surface">
                 Y
               </span>
               <span
-                className={`grid h-8 w-8 place-items-center rounded-full bg-lilac text-[12px] text-ink ring-2 ring-panel transition-all duration-500 ${
+                className={`grid h-7 w-7 place-items-center rounded-full bg-lilac text-[11px] text-ink ring-2 ring-surface transition-all duration-500 ${
                   joined ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
                 }`}
               >
@@ -258,68 +265,68 @@ function Demo() {
             </div>
           </div>
 
-          {/* Cards */}
-          <div className="grid min-h-[294px] grid-cols-2 content-start gap-2.5 sm:min-h-[314px]">
+          {/* The list: one row per thing, a box to tick */}
+          <p className="px-3 pb-1.5 pt-4 text-[12px] font-medium text-muted">List</p>
+          <div className="min-h-[232px] overflow-hidden rounded-[22px] bg-surface py-0.5">
             {shown.map((it) => (
-              <div
-                key={it.id}
-                className="drop-in relative flex h-[142px] flex-col overflow-hidden rounded-[20px] border border-hairline/[0.14] bg-surface p-3.5 sm:h-[152px] sm:p-4"
-              >
-                <p
-                  className={`text-[16px] leading-[1.2] sm:text-[17px] ${
-                    it.done ? 'text-muted line-through' : 'text-ink'
-                  }`}
-                >
-                  {it.title}
-                </p>
-                <p className="mt-1 text-[13px] text-muted">
-                  {it.size}
-                  {it.qty > 1 && <span className={it.size ? 'ml-1.5 text-ink/70' : 'text-ink/70'}>×{it.qty}</span>}
-                </p>
-                <ProductArt
-                  art={parseItemInput(it.title).art}
-                  title={it.title}
-                  className={`pointer-events-none absolute bottom-2 right-2 h-[66px] w-[66px] transition-opacity duration-300 sm:h-[72px] sm:w-[72px] ${
-                    it.done ? 'opacity-30' : ''
-                  }`}
-                />
+              <div key={it.id} className="drop-in group/row flex items-center gap-3 pl-3.5">
                 <span
                   ref={(el) => {
                     rings.current[it.id] = el
                   }}
-                  className={`absolute bottom-3 left-3 grid h-[30px] w-[30px] place-items-center rounded-full transition-all duration-200 ${
-                    it.done ? 'bg-cobalt text-on-ink' : 'border-[1.5px] border-hairline/25 text-transparent'
+                  className={`relative grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[7px] transition-all duration-200 ${
+                    it.done ? 'bg-cobalt text-white' : 'border-[1.75px] border-hairline/25 text-transparent'
                   } ${tap === it.id ? 'scale-90' : ''}`}
                 >
-                  <Check className="h-[21px] w-[21px]" strokeWidth={2} />
+                  <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" aria-hidden="true">
+                    <path d="M5.5 12.5l4.2 4.2L18.5 7.8" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                   {it.by && (
-                    <span className="absolute -right-2 -top-2 grid h-[18px] w-[18px] place-items-center rounded-full bg-lilac text-[10px] text-ink ring-2 ring-surface">
+                    <span className="absolute -right-2.5 -top-2.5 grid h-[17px] w-[17px] place-items-center rounded-full bg-lilac text-[9px] text-ink ring-2 ring-surface">
                       {it.by}
                     </span>
                   )}
+                </span>
+                <span className="flex min-h-[57px] min-w-0 flex-1 items-center gap-2.5 border-t border-hairline/[0.07] pr-3.5 group-first/row:border-t-0">
+                  <span
+                    className={`min-w-0 flex-1 truncate text-[16px] ${it.done ? 'text-muted/80 line-through' : 'text-ink'}`}
+                  >
+                    {it.title}
+                  </span>
+                  <span className="font-mono text-[12px] text-muted">
+                    {it.size}
+                    {it.qty > 1 && <span className={it.size ? 'ml-1.5 text-ink/70' : 'text-ink/70'}>×{it.qty}</span>}
+                  </span>
+                  <ProductArt
+                    art={parseItemInput(it.title).art}
+                    title={it.title}
+                    className={`pointer-events-none h-[30px] w-[30px] shrink-0 transition-opacity duration-300 ${
+                      it.done ? 'opacity-35 grayscale' : ''
+                    }`}
+                  />
                 </span>
               </div>
             ))}
           </div>
 
           {/* Add bar */}
-          <div className="mt-3 flex h-[52px] items-center gap-2 rounded-full bg-ink p-1.5 pl-4">
-            <span className="min-w-0 flex-1 truncate text-[15px] text-on-ink">
+          <div className="mt-3 flex h-[52px] items-center gap-2 rounded-full bg-surface p-1.5 pl-4 shadow-[0_1px_2px_rgba(28,28,30,0.06),0_14px_30px_-14px_rgba(28,28,30,0.25)]">
+            <span className="min-w-0 flex-1 truncate text-[15px] text-ink">
               {typed ? (
                 <>
                   {typed}
-                  <span className="ml-0.5 inline-block h-[17px] w-[2px] translate-y-[3px] animate-pulse bg-lime" />
+                  <span className="ml-0.5 inline-block h-[17px] w-[2px] translate-y-[3px] animate-pulse bg-cobalt" />
                 </>
               ) : (
-                <span className="text-on-ink/50">I need…</span>
+                <span className="text-muted/80">Add an item…</span>
               )}
             </span>
             <span
-              className={`grid h-10 w-10 place-items-center rounded-full bg-lime text-ink transition-transform ${
+              className={`grid h-10 w-10 place-items-center rounded-[14px] bg-ink text-on-ink transition-transform ${
                 typed ? 'scale-105' : ''
               }`}
             >
-              <Plus className="h-[19px] w-[19px]" strokeWidth={2.2} />
+              <Plus className="h-[19px] w-[19px]" strokeWidth={2.4} />
             </span>
           </div>
 
@@ -329,14 +336,14 @@ function Demo() {
               sharing === 'off' ? 'pointer-events-none translate-y-[110%] opacity-0' : 'translate-y-0 opacity-100'
             }`}
           >
-            <p className="font-display text-[22px] tracking-[-0.02em] text-ink">Share this board</p>
+            <p className="text-[20px] font-semibold tracking-[-0.02em] text-ink">Share this board</p>
             <p className="mt-1 text-[13px] text-muted">Send the link to anyone. They sign up and they’re on it.</p>
-            <div className="mt-4 flex h-[48px] items-center gap-2 rounded-full bg-panel p-1.5 pl-4">
+            <div className="mt-4 flex h-[48px] items-center gap-2 rounded-[14px] bg-panel p-1.5 pl-4">
               <Link className="h-[16px] w-[16px] shrink-0 text-muted" />
               <span className="min-w-0 flex-1 truncate text-[13px] text-ink">nook…/join/saturday-shop-k7p2</span>
               <span
-                className={`rounded-full px-4 py-2 text-[13px] transition-colors ${
-                  sharing === 'copied' ? 'bg-lime text-ink' : 'bg-ink text-on-ink'
+                className={`rounded-[10px] px-4 py-2 text-[13px] font-medium transition-colors ${
+                  sharing === 'copied' ? 'bg-[#34C759] text-white' : 'bg-ink text-on-ink'
                 }`}
               >
                 {sharing === 'copied' ? 'Copied' : 'Copy link'}

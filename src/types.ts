@@ -176,22 +176,23 @@ const INK = '#111111'
 
 /** The stored ids predate the palette; `name` is what the colour is now called. */
 export const NOTE_COLORS: { id: NoteColor; name: string; dot: string; card: string; ink: string }[] = [
-  { id: 'amber', name: 'Lime', dot: '#E2F16B', card: '#E2F16B', ink: INK },
-  { id: 'lilac', name: 'Lilac', dot: '#DBB8F2', card: '#DBB8F2', ink: INK },
-  { id: 'sky', name: 'Cobalt', dot: '#4450D6', card: '#4450D6', ink: '#FFFFFF' },
-  { id: 'orchid', name: 'Tomato', dot: '#F0582F', card: '#F0582F', ink: INK },
-  { id: 'mint', name: 'Grey', dot: '#F2F2F5', card: '#F2F2F5', ink: INK },
+  { id: 'amber', name: 'Yellow', dot: '#FCD34D', card: '#FFF4D6', ink: INK },
+  { id: 'lilac', name: 'Lavender', dot: '#A5B4FC', card: '#EAEBFE', ink: INK },
+  { id: 'sky', name: 'Blue', dot: '#93C5FD', card: '#E2EFFF', ink: INK },
+  { id: 'orchid', name: 'Pink', dot: '#FCA5A5', card: '#FDE9E9', ink: INK },
+  { id: 'mint', name: 'Mint', dot: '#86EFAC', card: '#E1F5EA', ink: INK },
 ]
 
 /** Notes saved under a colour that is no longer in the picker keep a sensible one. */
 const RETIRED: Partial<Record<NoteColor, NoteColor>> = { pink: 'lilac' }
 
 /** Block colour for a board: the same one every time, whatever its position. */
+/** Each board's icon tile: a colour and one of the four shapes, drawn in white. */
 export const BOARD_BLOCKS = [
-  { bg: '#E2F16B', ink: '#111111' },
-  { bg: '#DBB8F2', ink: '#111111' },
-  { bg: '#4450D6', ink: '#FFFFFF' },
-  { bg: '#F0582F', ink: '#111111' },
+  { bg: '#FBBF24', ink: '#FFFFFF', tint: '#FFF4D6', shape: 'tri' },
+  { bg: '#A78BFA', ink: '#FFFFFF', tint: '#EFEAFE', shape: 'flower' },
+  { bg: '#6366F1', ink: '#FFFFFF', tint: '#EAEBFE', shape: 'circle' },
+  { bg: '#F87171', ink: '#FFFFFF', tint: '#FDE9E9', shape: 'square' },
 ] as const
 
 /**

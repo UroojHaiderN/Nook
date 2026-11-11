@@ -67,14 +67,14 @@ export default function PeopleSheet({ onClose }: { onClose: () => void }) {
         className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] flex max-h-[80%] animate-sheet-up flex-col rounded-sheet bg-surface p-5 pb-7 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[440px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-dialog-in"
       >
         <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-hairline/10" />
-        <p className="font-display text-[24px] font-normal tracking-[-0.03em] text-ink">Share this board</p>
+        <p className="text-[20px] font-semibold tracking-[-0.02em] text-ink">Share this board</p>
         <p className="mt-0.5 text-[13px] leading-snug text-muted">
           {backendConfigured
             ? 'Send this link to anyone. They sign up or sign in, and they’re on the board.'
             : 'Sharing needs accounts, which aren’t set up on this copy of Nook. The link only opens the board on this device.'}
         </p>
 
-        <div className="mt-4 flex h-[52px] items-center gap-2 rounded-full bg-panel p-1.5 pl-4">
+        <div className="mt-4 flex h-[52px] items-center gap-2 rounded-[16px] bg-panel p-1.5 pl-4">
           <Link className="h-[17px] w-[17px] shrink-0 text-muted" />
           <span className="min-w-0 flex-1 truncate text-[14px] text-ink" title={link}>
             {link.replace(/^https?:\/\//, '')}
@@ -82,8 +82,8 @@ export default function PeopleSheet({ onClose }: { onClose: () => void }) {
           <button
             onClick={() => void copy()}
             disabled={saved !== 'yes'}
-            className={`tap h-10 shrink-0 rounded-full px-5 text-[14px] transition-colors disabled:opacity-40 ${
-              copied ? 'bg-lime text-ink' : 'bg-ink text-on-ink'
+            className={`tap h-10 shrink-0 rounded-[12px] px-4 text-[14px] font-medium transition-colors disabled:opacity-40 ${
+              copied ? 'bg-[#34C759] text-white' : 'bg-ink text-on-ink'
             }`}
           >
             {saved === 'saving' ? 'Saving…' : copied ? 'Copied' : 'Copy link'}
@@ -102,7 +102,7 @@ export default function PeopleSheet({ onClose }: { onClose: () => void }) {
           <button
             onClick={() => void share()}
             disabled={saved !== 'yes'}
-            className="tap mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full border border-hairline/15 text-[14px] text-ink disabled:opacity-40"
+            className="tap mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-[14px] bg-panel text-[15px] text-ink disabled:opacity-40"
           >
             <Share className="h-[17px] w-[17px]" />
             Send with…
@@ -110,9 +110,9 @@ export default function PeopleSheet({ onClose }: { onClose: () => void }) {
         )}
 
         <p className="mt-5 px-1 text-[12px] font-medium text-muted">On this board</p>
-        <ul className="no-scrollbar mt-1 min-h-0 flex-1 space-y-1 overflow-y-auto">
+        <ul className="no-scrollbar mt-1.5 min-h-0 flex-1 overflow-y-auto rounded-[16px] bg-panel px-2">
           {people.map((m) => (
-            <li key={m.id} className="flex items-center gap-3 rounded-2xl px-1 py-2">
+            <li key={m.id} className="flex items-center gap-3 border-t border-hairline/[0.07] px-1 py-2.5 first:border-t-0">
               <Avatar person={m} size={34} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[15px] text-ink">

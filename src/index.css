@@ -32,25 +32,34 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-    --page: 255 255 255;
-    --canvas: 255 255 255;
+    /* A soft grey page with white grouped cards on it, iOS style. */
+    --page: 250 246 238;
+    --canvas: 250 246 238;
     --surface: 255 255 255;
-    --panel: 242 242 245;
-    --ink: 17 17 17;
+    --panel: 244 239 229;
+    --ink: 28 28 30;
     --on-ink: 255 255 255;
-    --muted: 107 107 112;
-    --hairline: 17 17 17;
-    --wave: 214 214 220;
-    --scrim: 17 17 17;
-    --danger: 232 76 40;
-    --accent: 17 17 17;
+    --muted: 108 108 114;
+    --hairline: 28 28 30;
+    --wave: 209 209 219;
+    --scrim: 28 28 30;
+    --danger: 229 72 77;
+    --accent: 28 28 30;
     --on-accent: 255 255 255;
-    --on-block: 17 17 17;
+    --on-block: 28 28 30;
 
-    --lime: 226 241 107;
-    --lilac: 219 184 242;
-    --cobalt: 68 80 214;
-    --tomato: 240 88 47;
+    /* Accents: indigo for done, and soft tints for notes and highlights. */
+    --lime: 253 230 138;
+    --lilac: 221 214 254;
+    --cobalt: 99 102 241;
+    --tomato: 248 113 113;
+    --lav: 234 235 254;
+    --lav-ink: 79 82 221;
+    --rose: 253 233 233;
+    --rose-ink: 214 62 70;
+    --sun: 255 244 214;
+    --mint: 225 245 234;
+    --sky: 226 239 255;
 
     color-scheme: light;
   }
@@ -223,11 +232,10 @@
 }
 
 /*
- * Big type is Bricolage at extra bold, set tight — that weight is where it
- * gets its punch. Placed last so it wins over per-element weight classes.
+ * Big type is the system font, semibold, set a touch tight — the calm,
+ * native look of the reference, not a display face shouting.
  */
 :is(h1, h2, .font-display) {
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  font-optical-sizing: auto;
+  font-weight: 650;
+  letter-spacing: -0.022em;
 }

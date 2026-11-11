@@ -1,7 +1,5 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import '@fontsource-variable/bricolage-grotesque/opsz.css'
-import '@fontsource-variable/dm-sans/opsz.css'
 import '../index.css'
 import './landing.css'
 import Landing from './Landing'

@@ -71,6 +71,13 @@ export const Check = ({ className, strokeWidth = 1.6 }: P) => (
   </svg>
 )
 
+/** A bare tick, for inside a filled box. */
+export const Tick = ({ className, strokeWidth = 2.4 }: P) => (
+  <svg viewBox="0 0 24 24" fill="none" className={base(className)}>
+    <path d="M5.5 12.5l4.2 4.2L18.5 7.8" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
 export const Phone = ({ className, strokeWidth = 1.6 }: P) => (
   <svg viewBox="0 0 24 24" fill="none" className={base(className)}>
     <path

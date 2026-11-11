@@ -4,10 +4,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // DM Sans for reading and controls; Bricolage Grotesque, extra bold,
-        // for the big type — titles, board names, the wordmark — where Nook has fun.
-        sans: ['"DM Sans Variable"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        display: ['"Bricolage Grotesque Variable"', '"DM Sans Variable"', '-apple-system', 'sans-serif'],
+        // The platform's own type: SF Pro on Apple devices, Segoe on Windows,
+        // Roboto on Android. Nothing to download, and it feels native everywhere.
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'system-ui', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        display: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'system-ui', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        // Small details — sizes, counts, times — in SF Mono, as the reference does.
+        mono: ['ui-monospace', '"SF Mono"', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
         ink: 'rgb(var(--ink) / <alpha-value>)',
@@ -29,6 +31,13 @@ export default {
         lilac: 'rgb(var(--lilac) / <alpha-value>)',
         cobalt: 'rgb(var(--cobalt) / <alpha-value>)',
         tomato: 'rgb(var(--tomato) / <alpha-value>)',
+        lav: 'rgb(var(--lav) / <alpha-value>)',
+        'lav-ink': 'rgb(var(--lav-ink) / <alpha-value>)',
+        rose: 'rgb(var(--rose) / <alpha-value>)',
+        'rose-ink': 'rgb(var(--rose-ink) / <alpha-value>)',
+        sun: 'rgb(var(--sun) / <alpha-value>)',
+        mint: 'rgb(var(--mint) / <alpha-value>)',
+        sky: 'rgb(var(--sky) / <alpha-value>)',
       },
       boxShadow: {
         card: '0 1px 2px rgba(28,28,30,0.04), 0 10px 24px -14px rgba(28,28,30,0.14)',
@@ -37,9 +46,9 @@ export default {
         sticky: '0 4px 12px rgba(28,28,30,0.06), 0 30px 60px -28px rgba(28,28,30,0.28)',
       },
       borderRadius: {
-        card: '22px',
+        card: '28px',
         block: '22px',
-        sheet: '28px',
+        sheet: '30px',
       },
       keyframes: {
         'sheet-up': {

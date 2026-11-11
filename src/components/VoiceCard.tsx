@@ -167,7 +167,7 @@ function Clip({ clip, person }: { clip: VoiceClip; person?: Member }) {
         aria-label={`${playing ? 'Pause' : 'Play'} voice note from ${person?.name ?? 'someone'}`}
         className="tap -m-2 grid h-11 w-11 shrink-0 place-items-center rounded-full"
       >
-        <span className="grid h-[28px] w-[28px] place-items-center rounded-full bg-ink text-on-ink">
+        <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-cobalt text-white">
           {playing ? <Pause className="h-[15px] w-[15px]" /> : <Play className="h-[15px] w-[15px]" />}
         </span>
       </button>
@@ -181,7 +181,7 @@ function Clip({ clip, person }: { clip: VoiceClip; person?: Member }) {
             <span
               key={i}
               className={`w-[2px] shrink-0 origin-center rounded-full transition-colors duration-150 ${
-                passed ? 'bg-cobalt' : 'bg-wave'
+                passed ? 'bg-cobalt' : 'bg-cobalt/25'
               } ${alive ? 'animate-breathe bg-cobalt/60' : ''}`}
               style={{
                 height: `${Math.round(h * 26)}px`,
@@ -193,8 +193,8 @@ function Clip({ clip, person }: { clip: VoiceClip; person?: Member }) {
       </div>
 
       <span
-        className={`w-[44px] shrink-0 text-right text-[13px] tabular-nums ${
-          clip.silent ? 'text-muted/50' : 'text-ink'
+        className={`w-[44px] shrink-0 text-right font-mono text-[12px] tabular-nums ${
+          clip.silent ? 'text-muted/50' : 'text-lav-ink'
         }`}
         title={clip.silent ? 'Saved without audio' : clip.transcript}
       >
@@ -213,7 +213,7 @@ export default function VoiceCard({ piece }: { piece: VoicePiece }) {
     <>
       <div
         {...press.handlers}
-        className="liftable col-span-2 flex flex-col justify-center gap-1 rounded-card border border-hairline/[0.14] bg-surface px-4 py-2.5 sm:px-5"
+        className="flex flex-col justify-center gap-1 rounded-[22px] bg-lav px-4 py-2"
       >
         {piece.clips.map((clip) => (
           <Clip key={clip.id} clip={clip} person={people.find((p) => p.id === clip.authorId)} />

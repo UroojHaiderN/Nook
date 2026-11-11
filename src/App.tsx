@@ -140,7 +140,7 @@ export default function App() {
             <div
               key={toast.id}
               role="status"
-              className={`pointer-events-auto flex items-center gap-3 rounded-full bg-ink py-2.5 pl-4 pr-2 text-[13px] text-on-ink shadow-lift ${
+              className={`pointer-events-auto flex items-center gap-3 rounded-full bg-ink py-2.5 pl-4 pr-2 text-[14px] text-on-ink shadow-lift ${
                 toast.action ? 'animate-toast-long' : 'animate-toast-in'
               }`}
             >
@@ -148,7 +148,7 @@ export default function App() {
               {toast.action && (
                 <button
                   onClick={toast.action.run}
-                  className="tap shrink-0 rounded-full bg-lime px-3 py-1.5 text-[12px] text-ink"
+                  className="tap shrink-0 rounded-full bg-on-ink/15 px-3 py-1.5 text-[12px] font-semibold text-[#A5B4FC]"
                 >
                   {toast.action.label}
                 </button>

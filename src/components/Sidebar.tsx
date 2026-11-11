@@ -5,6 +5,7 @@ import PieceMenu from './PieceMenu'
 import AccountMenu from './AccountMenu'
 import { agoShort, greeting, useBoard } from '../store'
 import { useLongPress } from '../hooks'
+import { BoardTile } from './Shapes'
 import { useAccount } from '../auth'
 import type { Board } from '../types'
 
@@ -41,7 +42,7 @@ function Row({
           if (e.key === 'Escape') setRenaming(false)
         }}
         aria-label="Board name"
-        className="w-full rounded-full bg-panel px-4 py-2.5 text-[15px] text-ink outline-none"
+        className="w-full rounded-[12px] bg-panel px-3 py-2.5 text-[15px] text-ink outline-none"
       />
     )
 
@@ -54,15 +55,16 @@ function Row({
           {...press.handlers}
           onClick={() => !press.consumed() && onOpen()}
           aria-current={active ? 'page' : undefined}
-          className={`flex w-full items-baseline gap-2 rounded-full py-2.5 pl-4 pr-11 text-left transition-colors ${
-            active ? 'bg-panel' : 'hover:bg-panel/60'
+          className={`flex w-full items-center gap-3 rounded-[14px] py-2 pl-2 pr-11 text-left transition-colors ${
+            active ? 'bg-lav' : 'hover:bg-hairline/[0.04]'
           }`}
         >
-          <span className={`min-w-0 flex-1 truncate text-[15px] ${active ? 'text-ink' : 'text-ink/70'}`}>
+          <BoardTile board={board} size={28} />
+          <span className={`min-w-0 flex-1 truncate text-[15px] ${active ? 'font-medium text-lav-ink' : 'text-ink'}`}>
             {board.title}
           </span>
         </button>
-        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[12px] text-muted transition-opacity group-focus-within:opacity-0 group-hover:opacity-0">
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[11px] text-muted transition-opacity group-focus-within:opacity-0 group-hover:opacity-0">
           {agoShort(board.updatedAt)}
         </span>
         <button
@@ -128,10 +130,10 @@ export default function Sidebar({
   }
 
   return (
-    <aside className="hidden w-[280px] shrink-0 flex-col border-r border-hairline/[0.08] bg-surface lg:flex">
+    <aside className="hidden w-[288px] shrink-0 flex-col border-r border-hairline/[0.06] bg-canvas lg:flex">
       <div className="flex items-center justify-between px-5 pb-4 pt-7">
         <div>
-          <span className="font-display block text-[26px] font-normal leading-none tracking-[-0.04em] text-ink">Nook</span>
+          <span className="block text-[24px] font-bold leading-none tracking-[-0.025em] text-ink">Nook</span>
           <span className="mt-1 block text-[12px] text-muted">{greeting()}</span>
         </div>
         <button
@@ -160,23 +162,23 @@ export default function Sidebar({
             }}
             placeholder="Name this board"
             aria-label="Name this board"
-            className="w-full rounded-full bg-panel px-4 py-3 text-[15px] text-ink outline-none placeholder:text-muted"
+            className="w-full rounded-[16px] bg-surface px-4 py-3 text-[15px] text-ink shadow-card outline-none placeholder:text-muted"
           />
         ) : (
           <button
             onClick={() => setCreating(true)}
-            className="tap flex w-full items-center gap-2 rounded-full bg-ink px-4 py-3 text-[14px] text-on-ink"
+            className="tap flex w-full items-center gap-3 rounded-[16px] bg-surface p-1.5 text-[15px] font-medium text-ink shadow-card"
           >
-            <Plus className="h-[16px] w-[16px]" strokeWidth={2.4} />
+            <span className="grid h-[30px] w-[30px] place-items-center rounded-[10px] bg-ink text-on-ink">
+              <Plus className="h-[16px] w-[16px]" strokeWidth={2.4} />
+            </span>
             New board
           </button>
         )}
       </div>
 
-      <p className="px-5 pb-1 pt-6 text-[11px] font-medium uppercase tracking-wider text-muted">
-        Boards
-      </p>
-      <nav className="no-scrollbar flex-1 space-y-0.5 overflow-y-auto px-3 pb-6">
+      <p className="px-5 pb-2 pt-6 text-[13px] font-medium text-muted">Boards</p>
+      <nav className="no-scrollbar mx-3 mb-4 flex-1 space-y-0.5 overflow-y-auto rounded-[22px] bg-surface p-1.5 [align-self:stretch] [flex:0_1_auto]">
         {ordered.map((b) => (
           <Row key={b.id} board={b} active={b.id === activeId} onOpen={() => onOpen(b.id)} />
         ))}

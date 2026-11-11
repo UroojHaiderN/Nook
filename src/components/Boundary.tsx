@@ -24,7 +24,7 @@ export default class Boundary extends Component<{ children: ReactNode }, State> 
 
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 bg-canvas px-10 text-center">
-        <p className="font-display text-[24px] font-normal tracking-[-0.02em] text-ink">Something broke</p>
+        <p className="text-[20px] font-semibold tracking-[-0.02em] text-ink">Something broke</p>
         <p className="text-[14px] leading-snug text-muted">
           Your boards are safe on this device. Reloading should put things right.
         </p>

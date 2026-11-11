@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Nook TikTok stage</title>
+    <style>
+      @font-face { font-family: Brico; src: url(/node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-opsz-normal.woff2) format('woff2'); font-weight: 200 800; }
+      @font-face { font-family: DMS; src: url(/node_modules/@fontsource-variable/dm-sans/files/dm-sans-latin-opsz-normal.woff2) format('woff2'); font-weight: 100 1000; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; }
+      body { font-family: DMS, sans-serif; background: #E2F16B; transition: background-color .45s ease; position: relative; }
+
+      /* The phone, in the middle third — clear of TikTok's buttons on the right and caption at the bottom. */
+      .phone { position: absolute; left: 166px; top: 392px; width: 748px; height: 1308px; border-radius: 74px; background: #111; padding: 14px; box-shadow: 0 50px 90px -30px rgba(17,17,17,.45); transform-origin: 50% 40%; transition: transform .6s cubic-bezier(.3,1.4,.5,1); }
+      .phone.out { transform: translateY(120%) rotate(6deg); }
+      .screen { position: relative; width: 720px; height: 1280px; border-radius: 60px; overflow: hidden; background: #fff; }
+      .screen iframe { border: 0; width: 432px; height: 768px; transform: scale(1.6667); transform-origin: 0 0; display: block; }
+
+      /* Sticker captions, top of frame. */
+      .cap { position: absolute; left: 0; right: 0; top: 150px; display: flex; justify-content: center; pointer-events: none; }
+      .sticker { font-family: Brico; font-weight: 800; font-size: 76px; line-height: 1.02; letter-spacing: -0.03em; padding: 26px 40px 30px; border-radius: 34px; max-width: 900px; text-align: center; box-shadow: 0 16px 0 -4px rgba(17,17,17,.9); opacity: 0; transform: scale(.6) rotate(-6deg); }
+      .sticker.show { animation: pop .5s cubic-bezier(.3,1.6,.5,1) forwards; }
+      .sticker.hide { animation: unpop .25s ease-in forwards; }
+      @keyframes pop { to { opacity: 1; transform: scale(1) rotate(var(--r, -2deg)); } }
+      @keyframes unpop { from { opacity: 1; transform: scale(1) rotate(var(--r, -2deg)); } to { opacity: 0; transform: scale(.8) rotate(var(--r, -2deg)); } }
+      .ink { background: #111; color: #fff; }
+      .lime { background: #E2F16B; color: #111; border: 6px solid #111; }
+      .lilac { background: #DBB8F2; color: #111; border: 6px solid #111; }
+      .cobalt { background: #4450D6; color: #fff; border: 6px solid #111; }
+      .white { background: #fff; color: #111; border: 6px solid #111; }
+
+      /* Full-screen cards for the hook and the end. */
+      .card { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 80px 220px; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+      .card.show { opacity: 1; }
+      .card h1 { font-family: Brico; font-weight: 800; letter-spacing: -0.035em; margin: 0; line-height: .98; font-size: 112px; }
+      .card p { font-size: 46px; margin: 34px 0 0; opacity: .75; line-height: 1.25; }
+      .card .pill { font: 600 44px DMS; background: #111; color: #fff; border-radius: 999px; padding: 20px 44px; margin-top: 42px; opacity: 1; }
+      .card .word { transform: scale(.4); opacity: 0; display: inline-block; }
+      .card.show .word { animation: word .45s cubic-bezier(.3,1.6,.5,1) forwards; }
+      @keyframes word { to { transform: none; opacity: 1; } }
+
+      .buddies { display: flex; gap: 22px; align-items: flex-end; margin-bottom: 56px; }
+      .bob { animation: bob 1.4s ease-in-out infinite; }
+      @keyframes bob { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-22px) rotate(4deg); } }
+
+      /* Share sheet and toast, drawn over the phone screen the way the app draws them. */
+      .sheet { position: absolute; left: 30px; right: 30px; bottom: 30px; background: #fff; border-radius: 52px; padding: 46px 44px 50px; box-shadow: 0 30px 70px -20px rgba(17,17,17,.5); transform: translateY(115%); transition: transform .5s cubic-bezier(.3,1.2,.5,1); }
+      .sheet.show { transform: none; }
+      .sheet h3 { font-family: Brico; font-weight: 800; letter-spacing: -0.03em; font-size: 50px; margin: 0; }
+      .sheet .sub { font-size: 28px; color: #6b6b70; margin: 12px 0 0; }
+      .sheet .link { margin-top: 32px; display: flex; align-items: center; gap: 16px; background: #F2F2F5; border-radius: 999px; padding: 12px 12px 12px 32px; font-size: 28px; }
+      .sheet .link span { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+      .sheet .btn { background: #111; color: #fff; border-radius: 999px; padding: 22px 36px; font-weight: 600; transition: background-color .2s, color .2s; }
+      .sheet .btn.done { background: #E2F16B; color: #111; }
+      .toast { position: absolute; left: 0; right: 0; bottom: 170px; display: flex; justify-content: center; opacity: 0; transform: translateY(20px); transition: all .3s ease; pointer-events: none; }
+      .toast.show { opacity: 1; transform: none; }
+      .toast span { background: #111; color: #fff; border-radius: 999px; padding: 22px 38px; font-size: 32px; font-weight: 500; }
+      .avatar { position: absolute; right: 150px; top: 46px; width: 64px; height: 64px; border-radius: 50%; background: #DBB8F2; border: 5px solid #fff; display: grid; place-items: center; font: 600 28px DMS; transform: scale(0); transition: transform .5s cubic-bezier(.3,1.6,.5,1); }
+      .avatar.show { transform: scale(1); }
+
+      .floaters svg { position: absolute; }
+    </style>
+  </head>
+  <body>
+    <div class="floaters" id="floaters"></div>
+
+    <div class="phone" id="phone">
+      <div class="screen">
+        <iframe id="app" src="about:blank"></iframe>
+        <div class="avatar" id="avatar">M</div>
+        <div class="sheet" id="sheet">
+          <h3>Share this board</h3>
+          <p class="sub">Send the link to anyone. They sign up and they’re on it.</p>
+          <div class="link"><span>nook…/join/weekly-shop-k7p2q9</span><b class="btn" id="copy">Copy link</b></div>
+        </div>
+        <div class="toast" id="toast"><span id="toastText"></span></div>
+      </div>
+    </div>
+
+    <div class="cap"><div class="sticker ink" id="sticker"></div></div>
+
+    <div class="card" id="card"></div>
+
+    <script>
+      const shapes = {
+        tri: (f = '#E2F16B') => `<svg viewBox="0 0 100 100" width="S" height="S"><path d="M50 6 L96 90 Q97 94 92 94 L8 94 Q3 94 4 90 Z" fill="${f}"/>${face(50, 66, '#111')}</svg>`,
+        square: () => `<svg viewBox="0 0 100 100" width="S" height="S"><rect x="8" y="8" width="84" height="84" rx="10" fill="#F0582F"/>${face(50, 50, '#111')}</svg>`,
+        circle: () => `<svg viewBox="0 0 100 100" width="S" height="S"><circle cx="50" cy="50" r="44" fill="#4450D6"/>${face(50, 50, '#fff')}</svg>`,
+        flower: (f = '#DBB8F2') => `<svg viewBox="0 0 100 100" width="S" height="S"><g fill="${f}"><circle cx="50" cy="26" r="24"/><circle cx="74" cy="50" r="24"/><circle cx="50" cy="74" r="24"/><circle cx="26" cy="50" r="24"/><circle cx="50" cy="50" r="22"/></g>${face(50, 52, '#111')}</svg>`,
+      }
+      function face(x, y, ink) {
+        return `<g transform="translate(${x} ${y})" fill="${ink}" stroke="${ink}"><ellipse cx="-11" cy="-6" rx="4.4" ry="5.6" stroke="none"/><ellipse cx="11" cy="-6" rx="4.4" ry="5.6" stroke="none"/><path d="M-8 6 q8 8 16 0" fill="none" stroke-width="3.4" stroke-linecap="round"/></g>`
+      }
+      const shape = (k, size, extra = '', fill) => shapes[k](fill).replaceAll('width="S" height="S"', `width="${size}" height="${size}" ${extra}`)
+      // On a lime or lilac card, the shape of that colour turns white so it doesn't vanish.
+      const buddies = (size = 130, bg = '#FFFFFF') => {
+        const fill = (k) => (k === 'tri' && bg === '#E2F16B') || (k === 'flower' && bg === '#DBB8F2') ? '#FFFFFF' : undefined
+        return `<div class="buddies">${['tri', 'square', 'circle', 'flower'].map((k, i) => `<span class="bob" style="animation-delay:${i * 0.18}s">${shape(k, k === 'square' ? size * 0.88 : size, '', fill(k))}</span>`).join('')}</div>`
+      }
+
+      // Shapes drifting around the phone.
+      // The background flips between lime and lilac, so the floaters are the two
+      // colours that show on both, plus white versions of the other two.
+      document.getElementById('floaters').innerHTML = [
+        ['circle', 116, 'left:44px;top:300px'],
+        ['flower', 104, 'right:64px;top:1150px', '#FFFFFF'],
+        ['tri', 100, 'left:46px;top:1520px', '#FFFFFF'],
+        ['square', 84, 'right:84px;top:320px'],
+      ].map(([k, s, pos, f], i) => `<span class="bob" style="position:absolute;${pos};animation-delay:${i * 0.3}s">${shape(k, s, '', f)}</span>`).join('')
+
+      window.bgColor = (c) => (document.body.style.backgroundColor = c)
+      let capTimer
+      window.caption = (text, variant = 'ink', rot = -2) => {
+        const s = document.getElementById('sticker')
+        clearTimeout(capTimer)
+        if (s.classList.contains('show')) {
+          s.className = 'sticker hide ' + s.dataset.v
+          capTimer = setTimeout(() => show(), 240)
+        } else show()
+        function show() {
+          if (!text) return (s.className = 'sticker')
+          s.dataset.v = variant
+          s.style.setProperty('--r', rot + 'deg')
+          s.innerHTML = text
+          s.className = 'sticker ' + variant
+          void s.offsetWidth
+          s.classList.add('show')
+        }
+      }
+      window.card = (html, bg, ink = '#111') => {
+        const c = document.getElementById('card')
+        if (!html) return c.classList.remove('show')
+        c.style.background = bg
+        c.style.color = ink
+        c.innerHTML = html
+        c.classList.remove('show')
+        void c.offsetWidth
+        c.classList.add('show')
+      }
+      window.words = (text) => text.split(' ').map((w, i) => `<span class="word" style="animation-delay:${0.08 + i * 0.07}s">${w}</span>`).join(' ')
+      window.buddiesHtml = buddies
+      window.phone = (shown) => document.getElementById('phone').classList.toggle('out', !shown)
+      window.share = (state) => {
+        document.getElementById('sheet').classList.toggle('show', state !== 'off')
+        const b = document.getElementById('copy')
+        b.classList.toggle('done', state === 'copied')
+        b.textContent = state === 'copied' ? 'Copied ✓' : 'Copy link'
+      }
+      window.toast = (text) => {
+        const t = document.getElementById('toast')
+        if (!text) return t.classList.remove('show')
+        document.getElementById('toastText').textContent = text
+        t.classList.add('show')
+      }
+      window.avatar = (on) => document.getElementById('avatar').classList.toggle('show', on)
+    </script>
+  </body>
+</html>

@@ -169,7 +169,7 @@ export default function AuthScreen() {
         <button
           type="submit"
           disabled={busy}
-          className="tap mt-6 h-[58px] w-full rounded-full bg-ink text-[16px] text-on-ink disabled:opacity-40"
+          className="tap mt-6 h-[54px] w-full rounded-[16px] bg-ink font-medium text-[16px] text-on-ink disabled:opacity-40"
         >
           {busy
             ? 'One moment…'
@@ -236,7 +236,7 @@ export function NewPasswordScreen() {
         <button
           type="submit"
           disabled={busy}
-          className="tap mt-6 h-[58px] w-full rounded-full bg-ink text-[16px] text-on-ink disabled:opacity-40"
+          className="tap mt-6 h-[54px] w-full rounded-[16px] bg-ink font-medium text-[16px] text-on-ink disabled:opacity-40"
         >
           {busy ? 'One moment…' : 'Save password'}
         </button>
@@ -288,7 +288,7 @@ function Inbox({
           setNote(message ?? 'Sent again.')
           setWait(60)
         }}
-        className="tap mt-5 h-[58px] w-full rounded-full bg-ink text-[16px] text-on-ink disabled:opacity-40"
+        className="tap mt-5 h-[54px] w-full rounded-[16px] bg-ink font-medium text-[16px] text-on-ink disabled:opacity-40"
       >
         {wait > 0 ? `Send again in ${wait}s` : 'Send again'}
       </button>
@@ -300,18 +300,18 @@ function Inbox({
 }
 
 const FIELD =
-  'h-[54px] w-full rounded-full bg-panel px-5 text-[16px] text-ink outline-none ring-ink/20 placeholder:text-muted focus:ring-2'
+  'h-[52px] w-full rounded-[16px] bg-surface px-4 text-[17px] text-ink outline-none ring-1 ring-hairline/[0.07] placeholder:text-muted/80 focus:ring-2 focus:ring-cobalt/50'
 
 function Frame({ title, sub, children }: { title: string; sub: ReactNode; children: ReactNode }) {
   return (
     <div className="no-scrollbar h-full overflow-y-auto bg-canvas lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:overflow-hidden">
       {/* Desktop: the brand beside the form, the way a website's sign-in looks. */}
-      <aside className="relative hidden flex-col justify-between overflow-hidden bg-lime p-12 lg:flex">
-        <a href="/" className="font-display text-[26px] tracking-[-0.04em] text-ink">
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-lav p-12 lg:flex">
+        <a href="/" className="text-[24px] font-bold tracking-[-0.025em] text-ink">
           Nook
         </a>
         <div>
-          <p className="font-display max-w-md text-[56px] leading-[0.98] tracking-[-0.05em] text-ink">
+          <p className="max-w-md text-[48px] font-bold leading-[1.02] tracking-[-0.035em] text-ink">
             The shopping list the whole house can see.
           </p>
           <p className="mt-5 max-w-sm text-[17px] leading-[1.5] text-ink/70">
@@ -319,7 +319,7 @@ function Frame({ title, sub, children }: { title: string; sub: ReactNode; childr
           </p>
         </div>
         <div className="flex items-end gap-4">
-          <Buddy kind="tri" size={84} color="#FFFFFF" />
+          <Buddy kind="tri" size={84} />
           <Buddy kind="square" size={72} delay={0.35} mood="wink" />
           <Buddy kind="circle" size={92} delay={0.7} />
           <Buddy kind="flower" size={84} delay={1.05} mood="wow" />
@@ -335,7 +335,7 @@ function Frame({ title, sub, children }: { title: string; sub: ReactNode; childr
               <Circle className="h-7 w-7" />
               <Flower className="h-7 w-7" />
             </a>
-            <h1 className="text-[42px] font-normal leading-[0.98] tracking-[-0.045em] text-ink">
+            <h1 className="text-[34px] font-bold leading-[1.08] tracking-[-0.025em] text-ink">
               {title}
             </h1>
             <p className="mt-2 text-[14px] leading-snug text-muted">{sub}</p>
@@ -366,7 +366,7 @@ function Label({ htmlFor, children }: { htmlFor: string; children: ReactNode }) 
 
 function TextButton({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className="text-ink underline underline-offset-2">
+    <button type="button" onClick={onClick} className="font-medium text-cobalt">
       {children}
     </button>
   )

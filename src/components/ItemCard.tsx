@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import ProductArt from './ProductArt'
 import PieceMenu from './PieceMenu'
-import { Check, Plus, Trash } from './Icons'
+import { Plus, Tick, Trash } from './Icons'
 import { useBoard } from '../store'
 import { celebrateFrom } from './Confetti'
 import { useEscape, useLongPress } from '../hooks'
@@ -34,7 +34,7 @@ function EditSheet({ piece, onClose }: { piece: ItemPiece; onClose: () => void }
         className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] animate-sheet-up rounded-sheet bg-surface p-5 pb-7 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[420px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-dialog-in"
       >
         <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-hairline/10" />
-        <p className="font-display mb-3 text-[22px] font-normal tracking-[-0.03em] text-ink">Edit item</p>
+        <p className="mb-3 text-[20px] font-semibold tracking-[-0.02em] text-ink">Edit item</p>
 
         <label className="mb-1.5 block px-1 text-[12px] font-medium text-muted" htmlFor="edit-name">
           Name
@@ -95,8 +95,8 @@ function EditSheet({ piece, onClose }: { piece: ItemPiece; onClose: () => void }
               key={c}
               onClick={() => setCategory(c)}
               aria-pressed={category === c}
-              className={`tap h-[30px] shrink-0 rounded-full border px-3 text-[13px] transition-colors ${
-                category === c ? 'border-ink bg-ink text-on-ink' : 'border-hairline/15 text-ink'
+              className={`tap h-[32px] shrink-0 rounded-full px-3.5 text-[13px] transition-colors ${
+                category === c ? 'bg-cobalt text-white' : 'bg-panel text-ink'
               }`}
             >
               {c}
@@ -107,13 +107,13 @@ function EditSheet({ piece, onClose }: { piece: ItemPiece; onClose: () => void }
         <div className="mt-4 flex gap-2">
           <button
             onClick={onClose}
-            className="tap h-11 flex-1 rounded-full bg-panel text-[14px] text-ink"
+            className="tap h-12 flex-1 rounded-[16px] bg-panel text-[14px] text-ink"
           >
             Cancel
           </button>
           <button
             onClick={save}
-            className="tap h-11 flex-1 rounded-full bg-ink text-[14px] text-on-ink"
+            className="tap h-12 flex-1 rounded-[16px] bg-ink font-medium text-[14px] text-on-ink"
           >
             Save
           </button>
@@ -176,9 +176,8 @@ export default function ItemCard({ piece }: { piece: ItemPiece }) {
   return (
     <>
       {/*
-       * Four things and no more: what it is, how much, one tap to tick it off,
-       * and a picture. Quantity is text — the black badge it used to be collided
-       * with the illustration and added a control nobody asked for.
+       * One row, as in a reminders list: the box to tick, what it is, how much,
+       * and a little picture. Tap the row for Edit and Delete.
        */}
       <div
         role="button"
@@ -187,81 +186,10 @@ export default function ItemCard({ piece }: { piece: ItemPiece }) {
         {...press.handlers}
         onClick={() => !press.consumed() && setMenu(true)}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setMenu(true)}
-        key={`card-${cheer}`}
-        className={`tap liftable relative flex h-[148px] cursor-pointer flex-col overflow-hidden rounded-card border border-hairline/[0.14] bg-surface p-4 ${
-          cheer ? 'animate-squish' : fresh ? 'animate-pop-in' : ''
+        className={`group/row flex min-h-[56px] cursor-pointer items-center gap-3.5 pl-4 transition-colors hover:bg-hairline/[0.025] active:bg-hairline/[0.05] ${
+          fresh ? 'animate-fade-in' : ''
         }`}
       >
-        <p
-          title={piece.title}
-          className={`line-clamp-2 pr-1 text-[17px] font-normal leading-[1.2] tracking-[-0.02em] ${
-            piece.done ? 'text-muted line-through decoration-muted/70' : 'text-ink'
-          }`}
-        >
-          {piece.title}
-        </p>
-
-        {/* The size line is the quantity control. "×1" says nothing, so it only
-            appears once there is more than one — but the tap target stays. */}
-        <div className="mt-1 text-[13px]">
-          {stepping ? (
-            <span className="inline-flex animate-pop-in items-center gap-0.5 rounded-full bg-ink px-1 py-0.5 text-on-ink">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  bumpQty(piece.id, -1)
-                  keepOpen()
-                }}
-                aria-label="Decrease quantity"
-                className="grid h-[18px] w-[18px] place-items-center rounded-full text-[14px] leading-none opacity-70"
-              >
-                −
-              </button>
-              <span className="min-w-[12px] text-center text-[11px] font-medium tabular-nums">
-                {piece.qty}
-              </span>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  bumpQty(piece.id, 1)
-                  keepOpen()
-                }}
-                aria-label="Increase quantity"
-                className="grid h-[18px] w-[18px] place-items-center rounded-full"
-              >
-                <Plus className="h-[11px] w-[11px]" strokeWidth={2.6} />
-              </button>
-            </span>
-          ) : (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setStepping(true)
-                keepOpen()
-              }}
-              aria-label={`${size ? `${size}, ` : ''}quantity ${piece.qty}. Tap to change`}
-              className="text-muted"
-            >
-              {size}
-              {/* Nothing to say about one of something with no size: say nothing. */}
-              {piece.qty > 1 && (
-                <span className={`font-medium tabular-nums text-ink/70 ${size ? 'ml-1.5' : ''}`}>
-                  ×{piece.qty}
-                </span>
-              )}
-            </button>
-          )}
-        </div>
-
-        <ProductArt
-          key={`art-${cheer}`}
-          art={piece.art}
-          title={piece.title}
-          className={`art pointer-events-none absolute bottom-2 right-2 h-[76px] w-[76px] origin-bottom transition-opacity duration-300 ${
-            piece.done ? 'opacity-30' : ''
-          } ${cheer ? 'animate-hop' : ''}`}
-        />
-
         <button
           ref={ringRef}
           onClick={(e) => {
@@ -272,21 +200,82 @@ export default function ItemCard({ piece }: { piece: ItemPiece }) {
             piece.done ? `Mark ${piece.title} as still needed` : `Mark ${piece.title} as got`
           }
           aria-pressed={piece.done}
-          className={`group/tick tap hit z-10 absolute bottom-3.5 left-3.5 grid h-[32px] w-[32px] place-items-center rounded-full transition-colors duration-200 ${
+          className={`group/tick hit z-10 grid h-[24px] w-[24px] shrink-0 place-items-center rounded-[7px] transition-colors duration-200 ${
             piece.done
-              ? `${cheer ? 'animate-check-in' : ''} bg-cobalt text-on-ink`
-              : 'border-[1.5px] border-hairline/25 text-ink hover:border-hairline/50'
+              ? `${cheer ? 'animate-check-in' : ''} bg-cobalt text-white`
+              : 'border-[1.75px] border-hairline/25 text-cobalt hover:border-cobalt/60'
           }`}
         >
-          {/* An empty ring until it's got — a tick inside an unticked box reads as done.
-              On a pointer, the tick previews on hover. */}
-          <Check
-            className={`h-[23px] w-[23px] transition-opacity ${
-              piece.done ? '' : 'opacity-0 group-hover/tick:opacity-30'
-            }`}
-            strokeWidth={2}
+          {/* Empty until it's got; on a pointer, the tick previews on hover. */}
+          <Tick
+            className={`h-[17px] w-[17px] transition-opacity ${piece.done ? '' : 'opacity-0 group-hover/tick:opacity-40'}`}
+            strokeWidth={2.6}
           />
         </button>
+
+        {/* The divider starts after the box, as iOS lists do. */}
+        <div className="flex min-h-[56px] min-w-0 flex-1 items-center gap-3 border-t border-hairline/[0.07] py-2 pr-4 group-first/row:border-t-0">
+          <p
+            title={piece.title}
+            className={`min-w-0 flex-1 truncate text-[17px] leading-snug tracking-[-0.01em] transition-colors ${
+              piece.done ? 'text-muted/80 line-through decoration-muted/60' : 'text-ink'
+            }`}
+          >
+            {piece.title}
+          </p>
+
+          {/* The size is the quantity control: tap it to step the count. */}
+          {stepping ? (
+            <span className="inline-flex shrink-0 animate-pop-in items-center gap-0.5 rounded-full bg-panel px-1 py-1 text-ink">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  bumpQty(piece.id, -1)
+                  keepOpen()
+                }}
+                aria-label="Decrease quantity"
+                className="grid h-[24px] w-[24px] place-items-center rounded-full text-[16px] leading-none text-muted"
+              >
+                −
+              </button>
+              <span className="min-w-[16px] text-center font-mono text-[13px] tabular-nums">{piece.qty}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  bumpQty(piece.id, 1)
+                  keepOpen()
+                }}
+                aria-label="Increase quantity"
+                className="grid h-[24px] w-[24px] place-items-center rounded-full text-muted"
+              >
+                <Plus className="h-[13px] w-[13px]" strokeWidth={2.4} />
+              </button>
+            </span>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setStepping(true)
+                keepOpen()
+              }}
+              aria-label={`${size ? `${size}, ` : ''}quantity ${piece.qty}. Tap to change`}
+              className="hit shrink-0 font-mono text-[13px] tabular-nums text-muted"
+            >
+              {size}
+              {piece.qty > 1 && <span className={`text-ink/70 ${size ? 'ml-1.5' : ''}`}>×{piece.qty}</span>}
+              {!size && piece.qty <= 1 && <span className="opacity-0 group-hover/row:opacity-50">×1</span>}
+            </button>
+          )}
+
+          <ProductArt
+            key={`art-${cheer}`}
+            art={piece.art}
+            title={piece.title}
+            className={`art pointer-events-none h-[34px] w-[34px] shrink-0 origin-bottom transition-opacity duration-300 ${
+              piece.done ? 'opacity-35 grayscale' : ''
+            } ${cheer ? 'animate-hop' : ''}`}
+          />
+        </div>
       </div>
 
       {menu && (

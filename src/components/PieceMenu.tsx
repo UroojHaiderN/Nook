@@ -40,28 +40,32 @@ export default function PieceMenu({
         aria-label={title}
         className="absolute inset-x-2 bottom-[calc(var(--safe-bottom)+8px)] animate-sheet-up overflow-hidden rounded-sheet bg-surface p-3 pb-4 shadow-lift sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[380px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:animate-dialog-in"
       >
-        <p className="font-display truncate px-2 pb-2 pt-2 text-[22px] font-normal tracking-[-0.03em] text-ink">{title}</p>
+        <p className="truncate px-2 pb-2 pt-2 text-[20px] font-semibold tracking-[-0.02em] text-ink">{title}</p>
         {note && <p className="px-2 pb-4 text-[14px] leading-snug text-muted">{note}</p>}
-        {actions.map((a) => (
-          <button
-            key={a.label}
-            role="menuitem"
-            onClick={() => {
-              a.run()
-              if (!a.keepOpen) onClose()
-            }}
-            className={`tap mb-1.5 flex w-full items-center justify-between rounded-full bg-panel px-5 py-3.5 text-left text-[16px] ${
-              a.destructive ? 'text-danger' : 'text-ink'
-            }`}
-          >
-            {a.label}
-            {a.icon}
-          </button>
-        ))}
+        {actions.length > 0 && (
+          <div className="overflow-hidden rounded-[18px] bg-panel">
+            {actions.map((a) => (
+              <button
+                key={a.label}
+                role="menuitem"
+                onClick={() => {
+                  a.run()
+                  if (!a.keepOpen) onClose()
+                }}
+                className={`flex w-full items-center justify-between border-t border-hairline/[0.07] px-4 py-3.5 text-left text-[17px] transition-colors first:border-t-0 active:bg-hairline/[0.06] ${
+                  a.destructive ? 'text-danger' : 'text-ink'
+                }`}
+              >
+                {a.label}
+                {a.icon}
+              </button>
+            ))}
+          </div>
+        )}
         <button
           onClick={onClose}
-          className={`tap h-12 w-full rounded-full bg-ink text-[16px] text-on-ink ${
-            actions.length ? 'mt-1' : ''
+          className={`tap h-12 w-full rounded-[18px] bg-ink text-[17px] font-medium text-on-ink ${
+            actions.length ? 'mt-2' : ''
           }`}
         >
           {actions.length ? 'Cancel' : 'Close'}

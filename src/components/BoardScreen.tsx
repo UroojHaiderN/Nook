@@ -5,9 +5,9 @@ import VoiceCard from './VoiceCard'
 import AddSheet from './AddSheet'
 import PeopleSheet from './PeopleSheet'
 import { Avatar } from './Chrome'
-import { Back, More, PersonPlus, Plus, Trash, Tune } from './Icons'
+import { Back, Tick, More, PersonPlus, Plus, Trash, Tune } from './Icons'
 import PieceMenu from './PieceMenu'
-import { ShapeCluster } from './Shapes'
+import { BoardTile, ProgressRing } from './Shapes'
 import { ago, useBoard } from '../store'
 import { useEscape } from '../hooks'
 import { aisleIndex, SORT_LABELS, type Piece, type SortMode } from '../types'
@@ -22,6 +22,19 @@ function useRotatingHint() {
     return () => window.clearInterval(t)
   }, [])
   return HINTS[i]
+}
+
+/** The items in one run, or — sorted by aisle — one run per aisle, in walking order. */
+function groupItems(items: Piece[], sort: SortMode) {
+  if (sort !== 'aisle') return items.length ? [{ heading: 'List', pieces: items }] : []
+  const groups: { heading: string; pieces: Piece[] }[] = []
+  for (const piece of items) {
+    if (piece.kind !== 'item') continue
+    const last = groups[groups.length - 1]
+    if (last && last.heading === piece.category) last.pieces.push(piece)
+    else groups.push({ heading: piece.category, pieces: [piece] })
+  }
+  return groups
 }
 
 export default function BoardScreen({
@@ -48,7 +61,6 @@ export default function BoardScreen({
   // thresholds, so a list just long enough to scroll doesn't flicker between.
   const [folded, setFolded] = useState(false)
   const onScroll = (e: React.UIEvent<HTMLElement>) => {
-    if (embedded) return
     const y = e.currentTarget.scrollTop
     if (!folded && y > 48) setFolded(true)
     else if (folded && y < 8) setFolded(false)
@@ -102,19 +114,6 @@ export default function BoardScreen({
     return [...list].sort(by[sort])
   }, [pieces, sort, hideDone])
 
-  /** Aisle order is the only view with headings; everything else is one run. */
-  const sections = useMemo(() => {
-    if (sort !== 'aisle') return [{ heading: null as string | null, pieces: visible }]
-    const groups: { heading: string | null; pieces: Piece[] }[] = []
-    for (const piece of visible) {
-      const heading = piece.kind === 'item' ? piece.category : null
-      const last = groups[groups.length - 1]
-      if (last && last.heading === heading) last.pieces.push(piece)
-      else groups.push({ heading, pieces: [piece] })
-    }
-    return groups
-  }, [visible, sort])
-
   if (!board) return null
 
   const adjusted = hideDone || sort !== 'board'
@@ -132,42 +131,36 @@ export default function BoardScreen({
   /** Tap one and it's on the list — the quickest way to see how adding works. */
   const STARTERS = ['6 eggs', 'oat milk 1l', 'sourdough', 'bananas', 'coffee 250g']
 
-  /** Share and view, said in words — two bare icons left people guessing. */
+  /** Bare grey icons, as in the reference: the content is the colour. */
+  const iconBtn = 'tap grid h-10 w-10 place-items-center rounded-full text-muted transition-colors hover:bg-hairline/[0.06] hover:text-ink'
   const actions = (
-    <div className="flex shrink-0 items-center gap-2">
+    <div className="flex shrink-0 items-center gap-0.5">
       <button
         onClick={() => setPeopleOpen(true)}
         aria-label={invited.length ? `Share — ${invited.length + 1} people on this board` : 'Share this board'}
-        className="tap flex h-10 items-center gap-2 rounded-full border border-hairline/15 pl-2.5 pr-4 text-[15px] text-ink hover:border-hairline/35"
+        className={invited.length ? 'tap flex h-10 items-center rounded-full px-2 hover:bg-hairline/[0.06]' : iconBtn}
       >
         {invited.length ? (
           <span className="flex -space-x-1.5">
             {invited.slice(0, 3).map((m) => (
-              <Avatar key={m.id} person={m} size={22} ring />
+              <Avatar key={m.id} person={m} size={24} ring />
             ))}
           </span>
         ) : (
-          <PersonPlus className="h-[19px] w-[19px]" />
+          <PersonPlus className="h-[22px] w-[22px]" />
         )}
-        Share
       </button>
       <button
         onClick={() => setViewOpen((v) => !v)}
         aria-label={adjusted ? 'View options (some hidden)' : 'View options'}
         aria-expanded={viewOpen}
-        className={`tap flex h-10 items-center gap-2 rounded-full border px-3 text-[15px] transition-colors sm:pl-3 sm:pr-4 ${
-          viewOpen || adjusted ? 'border-ink bg-ink text-on-ink' : 'border-hairline/15 text-ink hover:border-hairline/35'
-        }`}
+        className={`${iconBtn} relative ${viewOpen ? 'bg-hairline/[0.08] text-ink' : ''}`}
       >
-        <Tune className="h-[19px] w-[19px]" />
-        <span className="hidden sm:inline">View</span>
+        <Tune className="h-[22px] w-[22px]" />
+        {adjusted && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-cobalt ring-2 ring-canvas" />}
       </button>
-      <button
-        onClick={() => setBoardMenu(true)}
-        aria-label="More: rename or delete this board"
-        className="tap grid h-10 w-10 place-items-center rounded-full border border-hairline/15 text-ink hover:border-hairline/35"
-      >
-        <More className="h-[19px] w-[19px]" />
+      <button onClick={() => setBoardMenu(true)} aria-label="More: rename or delete this board" className={iconBtn}>
+        <More className="h-[22px] w-[22px]" />
       </button>
     </div>
   )
@@ -177,92 +170,96 @@ export default function BoardScreen({
     setRenaming(false)
   }
 
-  /** The add field, drawn for a light or a dark surface. */
-  const addBar = (dark: boolean) => (
-    <>
-      <input
-        ref={inputRef}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && submit()}
-        placeholder={`Add an item — try “${hint}”`}
-        aria-label="Add an item: type it and press Enter"
-        className={`w-full min-w-0 bg-transparent text-[16px] outline-none ${
-          dark ? 'text-on-ink placeholder:text-on-ink/45' : 'text-ink placeholder:text-muted'
-        }`}
-      />
-      {query && (
-        <button
-          onClick={() => {
-            setQuery('')
-            inputRef.current?.focus()
-          }}
-          aria-label="Clear"
-          className={`tap hit z-10 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[15px] leading-none ${
-            dark ? 'bg-on-ink/15 text-on-ink' : 'bg-hairline/15 text-ink'
-          }`}
-        >
-          ×
-        </button>
-      )}
-      <button
-        onClick={() => (query.trim() ? submit() : setAdding(true))}
-        aria-label={query.trim() ? `Add ${query.trim()}` : 'Add a note, voice memo or item'}
-        className={`tap hit z-10 grid h-[42px] w-[42px] shrink-0 place-items-center rounded-full ${
-          dark ? 'bg-lime text-ink' : 'bg-ink text-on-ink'
-        }`}
-      >
-        <Plus className="h-[20px] w-[20px]" strokeWidth={2.2} />
-      </button>
-    </>
-  )
+  const items = visible.filter((p) => p.kind === 'item')
+  const extras = visible.filter((p) => p.kind !== 'item')
+  const total = pieces.filter((p) => p.kind === 'item').length
+  const left = total - got
+
+  /** Items in one card — or, sorted by aisle, one card per aisle. */
+  const groups = groupItems(items, sort)
+
+  const label = 'px-4 pb-2 pt-6 text-[13px] font-medium text-muted'
 
   return (
     <div className="relative flex h-full flex-col bg-canvas">
-      {/* Header: the number you actually care about, at the size it deserves. */}
-      {/* Padding outside the max width, as in the grid below, so the title, the
-          field and the first card all start on the same line. */}
       <header
-        className={`relative z-20 shrink-0 bg-canvas/80 px-4 pb-3 backdrop-blur-xl sm:px-8 ${
-          embedded ? 'pt-7' : 'pt-[calc(var(--safe-top)+14px)] sm:pt-8'
+        className={`relative z-20 shrink-0 bg-canvas/85 px-3 pb-1 backdrop-blur-xl sm:px-6 ${
+          embedded ? 'pt-4' : 'pt-[calc(var(--safe-top)+8px)] sm:pt-5'
         }`}
       >
-        <div className="relative mx-auto w-full max-w-[1280px] px-1 sm:px-0">
-        <div className="flex items-start justify-between gap-3">
+        <div className="relative mx-auto flex w-full max-w-[720px] items-center gap-2">
           {embedded ? (
-            <span />
+            <span className="w-10" />
           ) : (
-            <>
-            <button
-              onClick={onBack}
-              aria-label="Back to boards"
-              className="tap -ml-1.5 grid h-11 w-11 shrink-0 place-items-center rounded-full"
-            >
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-ink text-on-ink">
-                <Back className="h-[18px] w-[18px]" strokeWidth={2} />
-              </span>
+            <button onClick={onBack} aria-label="Back to boards" className={`${iconBtn} -ml-1`}>
+              <Back className="h-[22px] w-[22px]" strokeWidth={2} />
             </button>
-            <p
-              aria-hidden={!folded}
-              className={`min-w-0 flex-1 self-center truncate text-center text-[17px] tracking-[-0.02em] text-ink transition-opacity duration-200 ${
-                folded ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              {board.title}
-            </p>
-            </>
           )}
+          <p
+            aria-hidden={!folded}
+            className={`min-w-0 flex-1 truncate text-center text-[17px] font-semibold tracking-[-0.01em] text-ink transition-opacity duration-200 ${
+              folded ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {board.title}
+          </p>
+          {actions}
 
-          {!embedded && actions}
+          {/* One popover for how the board is shown — order and filter together. */}
+          {viewOpen && (
+            <div className="absolute right-0 top-[46px] z-30 w-[248px] origin-top-right animate-pop-in rounded-[22px] bg-surface p-3 shadow-lift">
+              <p className="px-1 pb-2 text-[12px] font-medium text-muted">Order</p>
+              <div className="overflow-hidden rounded-[14px] bg-panel">
+                {(Object.keys(SORT_LABELS) as SortMode[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setSort(m)}
+                    aria-pressed={sort === m}
+                    className="flex w-full items-center justify-between border-t border-hairline/[0.07] px-3.5 py-2.5 text-left text-[15px] text-ink first:border-t-0"
+                  >
+                    {SORT_LABELS[m]}
+                    {sort === m && <Tick className="h-[18px] w-[18px] text-cobalt" />}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setHideDone((v) => !v)}
+                aria-pressed={hideDone}
+                className="tap mt-2 flex w-full items-center justify-between rounded-[14px] bg-panel px-3.5 py-2.5 text-left text-[15px] text-ink"
+              >
+                Hide what’s got
+                <span className={`relative h-[24px] w-[40px] rounded-full transition-colors ${hideDone ? 'bg-[#34C759]' : 'bg-hairline/15'}`}>
+                  <span
+                    className={`absolute top-[2px] h-[20px] w-[20px] rounded-full bg-white shadow transition-all ${
+                      hideDone ? 'left-[18px]' : 'left-[2px]'
+                    }`}
+                  />
+                </span>
+              </button>
+
+              {got > 0 && (
+                <button
+                  onClick={() => {
+                    clearDone()
+                    setViewOpen(false)
+                  }}
+                  className="tap mt-2 w-full rounded-[14px] bg-panel py-2.5 text-[15px] text-danger"
+                >
+                  Clear {got} got {got === 1 ? 'item' : 'items'}
+                </button>
+              )}
+            </div>
+          )}
         </div>
+      </header>
 
-        <div
-          className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${
-            folded ? 'max-h-0 opacity-0' : 'max-h-40 opacity-100'
-          }`}
-        >
-          <div className="flex items-end justify-between gap-4">
-            <div className="min-w-0">
+      <main onScroll={onScroll} className="no-scrollbar flex-1 overflow-y-auto px-3 pb-[128px] pt-1 sm:px-6">
+        <div className="mx-auto w-full max-w-[720px]">
+          {/* The board at a glance: what it is, and how much is left. */}
+          <section className="flex items-center gap-3.5 rounded-card bg-surface p-4 pr-5">
+            <BoardTile board={board} size={46} />
+            <div className="min-w-0 flex-1">
               {renaming ? (
                 <input
                   autoFocus
@@ -274,7 +271,7 @@ export default function BoardScreen({
                     if (e.key === 'Escape') setRenaming(false)
                   }}
                   aria-label="Board name"
-                  className="font-display mt-2 w-full rounded-2xl bg-panel px-3 text-[36px] leading-[1.15] tracking-[-0.04em] text-ink outline-none sm:text-[48px]"
+                  className="w-full rounded-xl bg-panel px-2 py-0.5 text-[22px] font-semibold tracking-[-0.02em] text-ink outline-none"
                 />
               ) : (
                 <h1
@@ -282,165 +279,116 @@ export default function BoardScreen({
                     setDraftTitle(board.title)
                     setRenaming(true)
                   }}
-                  className="mt-2 text-[36px] font-normal leading-[1.02] tracking-[-0.04em] text-ink sm:text-[48px]"
+                  className="truncate text-[22px] font-semibold leading-tight tracking-[-0.02em] text-ink"
                 >
                   {board.title}
                 </h1>
               )}
-              <p className="mt-1 text-[13px] text-muted">
-                {pieces.length === 0 ? 'Nothing on it yet' : `Updated ${ago(board.updatedAt)}`}
+              <p className="mt-0.5 truncate text-[13px] text-muted">
+                {pieces.length === 0
+                  ? 'Nothing on it yet'
+                  : `${total ? (left ? `${left} to get` : 'All got') : `${pieces.length} ${pieces.length === 1 ? 'note' : 'notes'}`} · Updated ${ago(board.updatedAt)}`}
               </p>
             </div>
-            {embedded && <div className="pb-1">{actions}</div>}
-          </div>
-        </div>
+            {total > 0 && <ProgressRing done={got} total={total} size={40} />}
+          </section>
 
-        {embedded && (
-          <div className="mt-6 flex h-[52px] items-center gap-1.5 rounded-full bg-panel p-2 pl-5">
-            {addBar(false)}
-          </div>
-        )}
-
-        {/* One popover for how the board is shown — order and filter together. */}
-        {viewOpen && (
-          <div className={`absolute right-0 z-30 w-[236px] ${embedded ? 'top-[84px]' : 'top-[48px]'} animate-pop-in origin-top-right rounded-[20px] bg-surface p-3 shadow-lift`}>
-            <p className="pb-2 text-[11px] font-medium uppercase tracking-wider text-muted">
-              Order
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {(Object.keys(SORT_LABELS) as SortMode[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setSort(m)}
-                  aria-pressed={sort === m}
-                  className={`tap h-[30px] rounded-full border px-3.5 text-[13px] transition-colors ${
-                    sort === m ? 'border-ink bg-ink text-on-ink' : 'border-hairline/20 text-ink'
-                  }`}
-                >
-                  {SORT_LABELS[m]}
-                </button>
-              ))}
-            </div>
-
-            {got > 0 && (
+          {visible.length === 0 && adjusted ? (
+            <section className="mt-4 rounded-card bg-surface p-6 text-center">
+              <p className="text-[17px] font-semibold text-ink">All hidden away</p>
+              <p className="mt-1 text-[14px] leading-snug text-muted">Everything here is tucked behind the view you chose.</p>
               <button
                 onClick={() => {
-                  clearDone()
-                  setViewOpen(false)
+                  setHideDone(false)
+                  setSort('board')
                 }}
-                className="tap mt-3 w-full rounded-full bg-panel py-2.5 text-[14px] text-danger"
+                className="tap mt-4 rounded-full bg-ink px-5 py-2.5 text-[14px] text-on-ink"
               >
-                Clear {got} got {got === 1 ? 'item' : 'items'}
+                Show everything
               </button>
-            )}
-
-            <button
-              onClick={() => setHideDone((v) => !v)}
-              aria-pressed={hideDone}
-              className="tap mt-3 flex w-full items-center justify-between py-1 text-left text-[14px] text-ink"
-            >
-              Hide what’s got
-              <span
-                className={`relative h-[20px] w-[32px] rounded-full transition-colors ${
-                  hideDone ? 'bg-cobalt' : 'bg-hairline/15'
-                }`}
-              >
-                <span
-                  className={`absolute top-[2px] h-[16px] w-[16px] rounded-full bg-on-block transition-all ${
-                    hideDone ? 'left-[14px]' : 'left-[2px]'
-                  }`}
-                />
-              </span>
-            </button>
-          </div>
-        )}
-        </div>
-      </header>
-
-      {/* Grid */}
-      <main onScroll={onScroll} className="no-scrollbar flex-1 overflow-y-auto px-4 pb-[120px] pt-1 sm:px-8">
-        <div className="mx-auto w-full max-w-[1280px]">
-        {visible.length === 0 && adjusted ? (
-          <div className="mt-10 max-w-md px-1">
-            <p className="font-display text-[24px] tracking-[-0.02em] text-ink">All hidden away</p>
-            <p className="mt-1 text-[14px] leading-snug text-muted">Everything here is tucked behind the view you chose.</p>
-            <button
-              onClick={() => {
-                setHideDone(false)
-                setSort('board')
-              }}
-              className="tap mt-4 rounded-full bg-ink px-5 py-2.5 text-[14px] text-on-ink"
-            >
-              Show everything
-            </button>
-          </div>
-        ) : visible.length === 0 ? (
-          <div className="mt-8 max-w-lg px-1 sm:mt-10">
-            <div className="origin-left scale-75">
-              <ShapeCluster />
-            </div>
-            <p className="font-display mt-2 text-[26px] tracking-[-0.02em] text-ink">Start your list</p>
-            <p className="mt-1 text-[15px] leading-snug text-muted">
-              Type what you need {embedded ? 'in the bar above' : 'in the bar below'} and press Enter — “6 eggs”,
-              “oat milk 1l”. Or tap one to try it:
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {STARTERS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => addItem(s)}
-                  className="tap rounded-full border border-hairline/15 px-3.5 py-2 text-[14px] text-ink hover:border-hairline/40"
-                >
-                  + {s}
-                </button>
-              ))}
-            </div>
-            {!embedded && (
-              <button onClick={() => setAdding(true)} className="mt-5 text-[14px] text-ink underline underline-offset-2">
+            </section>
+          ) : visible.length === 0 ? (
+            <section className="mt-4 rounded-card bg-surface p-6">
+              <p className="text-[17px] font-semibold text-ink">Start your list</p>
+              <p className="mt-1 text-[15px] leading-snug text-muted">
+                Type what you need in the bar below and press Enter — “6 eggs”, “oat milk 1l”. Or tap one to try it:
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {STARTERS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => addItem(s)}
+                    className="tap rounded-full bg-lav px-3.5 py-2 text-[14px] text-lav-ink"
+                  >
+                    + {s}
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => setAdding(true)} className="mt-5 text-[14px] text-cobalt">
                 Add a note or voice memo instead
               </button>
-            )}
-          </div>
-        ) : (
-          /* One grid per section. Dense packing then tidies the holes inside a
-             section without ever pulling a card under the wrong heading. */
-          <div className="space-y-1">
-            {sections.map((section) => (
-              <section key={section.heading ?? 'top'}>
-                {section.heading && (
-                  <h2 className="px-1 pb-1.5 pt-4 text-[12px] font-medium text-muted">
-                    {section.heading}
-                  </h2>
-                )}
-                <div className="grid grid-flow-row-dense grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
-                  {section.pieces.map((p) =>
-                    p.kind === 'item' ? (
-                      <ItemCard key={p.id} piece={p} />
-                    ) : p.kind === 'note' ? (
-                      <NoteCard key={p.id} piece={p} onOpen={onOpenNote} />
-                    ) : (
-                      <VoiceCard key={p.id} piece={p} />
-                    ),
-                  )}
+            </section>
+          ) : (
+            <>
+              {extras.length > 0 && (
+                <>
+                  <h2 className={label}>Notes</h2>
+                  <section className="space-y-1.5 rounded-card bg-surface p-1.5">
+                    {extras.map((p) =>
+                      p.kind === 'note' ? (
+                        <NoteCard key={p.id} piece={p} onOpen={onOpenNote} />
+                      ) : p.kind === 'voice' ? (
+                        <VoiceCard key={p.id} piece={p} />
+                      ) : null,
+                    )}
+                  </section>
+                </>
+              )}
+              {groups.map((g) => (
+                <div key={g.heading}>
+                  <h2 className={label}>{g.heading}</h2>
+                  <section className="overflow-hidden rounded-card bg-surface py-1">
+                    {g.pieces.map((p) => p.kind === 'item' && <ItemCard key={p.id} piece={p} />)}
+                  </section>
                 </div>
-              </section>
-            ))}
-          </div>
-        )}
+              ))}
+            </>
+          )}
         </div>
       </main>
 
-      {/* One bar, two jobs: say what you need, or add something richer. On a
-          phone it floats above the thumb; on a desktop it sits under the title,
-          because a bar hovering over empty space is a mobile habit, not a design. */}
-      {!embedded && (
-        <>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[120px] bg-gradient-to-t from-canvas via-canvas to-transparent" />
-          <div className="absolute inset-x-4 bottom-[calc(var(--safe-bottom)+16px)] z-20 mx-auto flex h-[58px] max-w-xl items-center gap-1.5 rounded-full bg-ink p-2 pl-4 sm:inset-x-8">
-            {addBar(true)}
-          </div>
-        </>
-      )}
+      {/* The one place to add things, floating above the thumb on every screen. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[110px] bg-gradient-to-t from-canvas via-canvas/90 to-transparent" />
+      <div className="absolute inset-x-3 bottom-[calc(var(--safe-bottom)+14px)] z-20 mx-auto flex h-[58px] max-w-[560px] items-center gap-2 rounded-full bg-surface p-2 pl-5 shadow-[0_1px_2px_rgba(28,28,30,0.06),0_16px_36px_-12px_rgba(28,28,30,0.22)] ring-1 ring-hairline/[0.05] sm:inset-x-6">
+        <input
+          ref={inputRef}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && submit()}
+          placeholder={`Add an item — try “${hint}”`}
+          aria-label="Add an item: type it and press Enter"
+          className="w-full min-w-0 bg-transparent text-[17px] text-ink outline-none placeholder:text-muted/80"
+        />
+        {query && (
+          <button
+            onClick={() => {
+              setQuery('')
+              inputRef.current?.focus()
+            }}
+            aria-label="Clear"
+            className="tap hit z-10 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-hairline/15 text-[15px] leading-none text-ink"
+          >
+            ×
+          </button>
+        )}
+        <button
+          onClick={() => (query.trim() ? submit() : setAdding(true))}
+          aria-label={query.trim() ? `Add ${query.trim()}` : 'Add a note, voice memo or item'}
+          className="tap hit z-10 grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[15px] bg-ink text-on-ink"
+        >
+          <Plus className="h-[20px] w-[20px]" strokeWidth={2.4} />
+        </button>
+      </div>
 
       {viewOpen && (
         <button

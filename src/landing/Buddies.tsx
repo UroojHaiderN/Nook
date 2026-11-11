@@ -10,10 +10,10 @@ type Kind = 'tri' | 'square' | 'circle' | 'flower'
 type Mood = 'happy' | 'wow' | 'wink'
 
 const FILL: Record<Kind, string> = {
-  tri: '#E2F16B',
-  square: '#F0582F',
-  circle: '#4450D6',
-  flower: '#DBB8F2',
+  tri: '#FCD34D',
+  square: '#F87171',
+  circle: '#6366F1',
+  flower: '#C4B5FD',
 }
 
 /** Where the face sits inside each shape's 100×100 box. */
